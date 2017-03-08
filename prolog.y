@@ -44,13 +44,63 @@ void yyerror(const char *s) {
 start: cmds {fprintf(stderr, "\tbison: start:\tcmds\n");}
        ;
 
-cmds:   cmd DOT cmds {fprintf(stderr, "\tbison: cmds:\tcmd cmds\n");}
-      | cmd DOT     {fprintf(stderr, "\tbison: cmds:\tcmd\n");}
+cmds:   cmd cmds {fprintf(stderr, "\tbison: cmds:\tcmd cmds\n");}
+      | cmd     {fprintf(stderr, "\tbison: cmds:\tcmd\n");}
       ;
 
-cmd: VAR_ID {}
-    | CONST_ID {}
+cmd: fact {fprintf(stderr, "\tbison: cmd:\tfact\n");}
+    | def {fprintf(stderr, "\tbison: cmd:\tdef\n");}
     ;
+
+fact: pred DOT {fprintf(stderr, "\tbison: fact:\tpred DOT\n");}
+      ;
+
+def:  VAR_ID /* TODO */
+      ;
+
+pred: CONST_ID POPEN params PCLOSE {fprintf(stderr, "\tbison: pred:\tfCONST_ID POPEN params PCLOSE\n");}
+      | CONST_ID {fprintf(stderr, "\tbison: pred:\tfCONST_ID\n");}
+      ;
+
+params: param COMMA params {}
+        | param {}
+        ;
+
+param: CONST_ID {}
+       | VAR_ID {}
+       | ANONYMOUS {}
+       | number {}
+       | list {}
+       ;
+
+number: VAR_ID  {}
+        | INT   {}
+        | FLOAT {}
+        | SUB number {}
+        ;
+
+list: LOPEN lelements LCLOSE {}
+		  |	LOPEN lelements PIPE list {}
+		  |	LOPEN lelements PIPE id {}
+		  |	LOPEN LCLOSE {}
+		  ;
+
+lelements: lelement COMMA {}
+			     | lelement {}
+			     ;
+
+id_const: id {}
+	       | CONST_ID {}
+	       ;
+
+id: VAR_ID {}
+	  | ANONYMOUS {}
+	  ;
+
+lelement:	id_const {}
+			    | number {}
+			    | list {}
+			    ;
 
 %%
 
