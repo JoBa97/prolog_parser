@@ -1,0 +1,4 @@
+prolog
+*.tab.c
+*.tab.h
+lex.yy.c
