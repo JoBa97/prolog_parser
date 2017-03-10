@@ -62,38 +62,38 @@ pred: CONST_ID POPEN params PCLOSE {fprintf(stderr, "\tbison: pred:\tCONST_ID PO
       | CONST_ID {fprintf(stderr, "\tbison: pred:\tfCONST_ID\n");}
       ;
 
-params: param COMMA params {}
-        | param {}
+params: param COMMA params {fprintf(stderr, "\tbison: params:\tparam COMMA params\n");}
+        | param {fprintf(stderr, "\tbison: params:\tparam\n");}
         ;
 
-param: CONST_ID {}
-       | VAR_ID {}
-       | ANONYMOUS {}
-       | number {}
-       | list {}
+param: CONST_ID {fprintf(stderr, "\tbison: param:\tCONST_ID\n");}
+       | VAR_ID {fprintf(stderr, "\tbison: param:\tVAR_ID\n");}
+       | ANONYMOUS {fprintf(stderr, "\tbison: param:\tANONYMOUS\n");}
+       | number {fprintf(stderr, "\tbison: param:\tnumber\n");}
+       | list {fprintf(stderr, "\tbison: param:\tlist\n");}
        ;
 
-number: INT   {}
-        | FLOAT {}
-        | SUB number {}
+number: INT {fprintf(stderr, "\tbison: number:\tINT\n");}
+        | FLOAT {fprintf(stderr, "\tbison: number:\tFLOAT\n");}
+        | SUB number {fprintf(stderr, "\tbison: number:\tSUB number\n");}
         ;
 
-list: LOPEN lelements LCLOSE {}
-		  |	LOPEN lelements PIPE list {}
-		  |	LOPEN lelements PIPE VAR_ID {}
-      |	LOPEN lelements PIPE ANONYMOUS {}
-		  |	LOPEN LCLOSE {}
+list: LOPEN lelements LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN lelements LCLOSE\n");}
+		  |	LOPEN lelements PIPE list LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE list LCLOSE\n");}
+		  |	LOPEN lelements PIPE VAR_ID LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE VAR_ID LCLOSE\n");}
+      |	LOPEN lelements PIPE ANONYMOUS LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE ANONYMOUS LCLOSE\n");}
+		  |	LOPEN LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN LCLOSE\n");}
 		  ;
 
-lelements: lelement COMMA {}
-			     | lelement {}
+lelements: lelement COMMA lelements {fprintf(stderr, "\tbison: lelements:\tlelement COMMA lelements\n");}
+			     | lelement {fprintf(stderr, "\tbison: lelements:\tlelement\n");}
 			     ;
 
-lelement: CONST_ID {}
-          | VAR_ID {}
-          | ANONYMOUS {}
-			    | number {}
-			    | list {}
+lelement: CONST_ID {fprintf(stderr, "\tbison: lelement:\tCONST_ID\n");}
+          | VAR_ID {fprintf(stderr, "\tbison: lelement:\tVAR_ID\n");}
+          | ANONYMOUS {fprintf(stderr, "\tbison: lelement:\tANONYMOUS\n");}
+			    | number {fprintf(stderr, "\tbison: lelement:\tnumber\n");}
+			    | list {fprintf(stderr, "\tbison: lelement:\tlist\n");}
 			    ;
 
 %%
