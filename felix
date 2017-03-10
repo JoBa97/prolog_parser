@@ -1,0 +1,14 @@
+comp_operator:	EQUAL {fprintf(stderr, "\tbison: comp_operator:\EQUAL\n");}
+				| UNEQUAL {fprintf(stderr, "\tbison: comp_operator:\UNEQUAL\n");}
+				| SMALLER_EQ {fprintf(stderr, "\tbison: comp_operator:\SMALLER_EQ\n");}
+				| LARGER_EQ {fprintf(stderr, "\tbison: comp_operator:\LARGER_EQ\n");}
+				| SMALLER {fprintf(stderr, "\tbison: comp_operator:\SMALLER\n");}
+				| LARGER {fprintf(stderr, "\tbison: comp_operator:\LARGER\n");}
+				;
+				
+bool_expr: 	VAR_ID comp_operator VAR_ID {fprintf(stderr, "\tbison: VAR_ID comp_operator VAR_ID:\EQUAL\n");}
+			| number comp_operator VAR_ID {fprintf(stderr, "\tbison: number comp_operator VAR_ID:\EQUAL\n");}
+			| VAR_ID comp_operator number {fprintf(stderr, "\tbison: VAR_ID comp_operator number:\EQUAL\n");}
+			| number comp_operator number {fprintf(stderr, "\tbison: number comp_operator number:\EQUAL\n");}
+			
+
