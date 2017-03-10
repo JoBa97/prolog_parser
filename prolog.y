@@ -55,10 +55,10 @@ cmd: fact {fprintf(stderr, "\tbison: cmd:\tfact\n");}
 fact: pred DOT {fprintf(stderr, "\tbison: fact:\tpred DOT\n");}
       ;
 
-def:  VAR_ID /* TODO */
+def:  DEF DOT /* TODO */
       ;
 
-pred: CONST_ID POPEN params PCLOSE {fprintf(stderr, "\tbison: pred:\tfCONST_ID POPEN params PCLOSE\n");}
+pred: CONST_ID POPEN params PCLOSE {fprintf(stderr, "\tbison: pred:\tCONST_ID POPEN params PCLOSE\n");}
       | CONST_ID {fprintf(stderr, "\tbison: pred:\tfCONST_ID\n");}
       ;
 
@@ -73,15 +73,15 @@ param: CONST_ID {}
        | list {}
        ;
 
-number: VAR_ID  {}
-        | INT   {}
+number: INT   {}
         | FLOAT {}
         | SUB number {}
         ;
 
 list: LOPEN lelements LCLOSE {}
 		  |	LOPEN lelements PIPE list {}
-		  |	LOPEN lelements PIPE id {}
+		  |	LOPEN lelements PIPE VAR_ID {}
+      |	LOPEN lelements PIPE ANONYMOUS {}
 		  |	LOPEN LCLOSE {}
 		  ;
 
@@ -89,15 +89,9 @@ lelements: lelement COMMA {}
 			     | lelement {}
 			     ;
 
-id_const: id {}
-	       | CONST_ID {}
-	       ;
-
-id: VAR_ID {}
-	  | ANONYMOUS {}
-	  ;
-
-lelement:	id_const {}
+lelement: CONST_ID {}
+          | VAR_ID {}
+          | ANONYMOUS {}
 			    | number {}
 			    | list {}
 			    ;

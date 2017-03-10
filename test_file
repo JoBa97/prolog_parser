@@ -1,3 +1,3 @@
 asd.
 as.
-wdf(1.3, as, [1, 2 |[A | B ]]).
+wdf([1, Abc, asd, _]).
