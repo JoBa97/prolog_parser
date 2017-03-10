@@ -1,3 +1,11 @@
 asd.
 as.
-wdf([1, Abc, asd, _]).
+wdf([]).
+wdf([1]).
+wdf([1,2]).
+fas([a,b]).
+faw([A,B]).
+afg([_,_]).
+fga([[],[a]]).
+fga([H|T]).
+fa([A,B , C|[H|_]]).
