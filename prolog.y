@@ -32,7 +32,7 @@ void yyerror(const char *s) {
 %token SUB
 %token MUL
 %token DIV
-%token EQUALS
+%token EQUAL
 %token UNEQUAL
 %token SMALLER_EQ
 %token LARGER_EQ
@@ -53,9 +53,6 @@ cmd: fact {fprintf(stderr, "\tbison: cmd:\tfact\n");}
     ;
 
 fact: pred DOT {fprintf(stderr, "\tbison: fact:\tpred DOT\n");}
-      ;
-
-def:  DEF DOT /* TODO */
       ;
 
 pred: CONST_ID POPEN params PCLOSE {fprintf(stderr, "\tbison: pred:\tCONST_ID POPEN params PCLOSE\n");}
@@ -95,6 +92,36 @@ lelement: CONST_ID {fprintf(stderr, "\tbison: lelement:\tCONST_ID\n");}
 			    | number {fprintf(stderr, "\tbison: lelement:\tnumber\n");}
 			    | list {fprintf(stderr, "\tbison: lelement:\tlist\n");}
 			    ;
+
+def: pred DEF expressions DOT {fprintf(stderr, "\tbison: def:\tpred DEF expressions DOT\n");}
+     ;
+
+expressions: expression COMMA expressions {fprintf(stderr, "\tbison: expression:\texpression COMMA expressions\n");}
+             | expression {fprintf(stderr, "\tbison: expression:\texpression\n");}
+             ;
+
+expression: pred {fprintf(stderr, "\tbison: expression:\tpred\n");}
+            | is_expr {fprintf(stderr, "\tbison: is_expr:\tpred\n");}
+            | bool_expr
+            ;
+
+comp_operator: EQUAL {fprintf(stderr, "\tbison: comp_operator:\tEQUAL\n");}
+				       | UNEQUAL {fprintf(stderr, "\tbison: comp_operator:\tUNEQUAL\n");}
+				       | SMALLER_EQ {fprintf(stderr, "\tbison: comp_operator:\tSMALLER_EQ\n");}
+				       | LARGER_EQ {fprintf(stderr, "\tbison: comp_operator:\tLARGER_EQ\n");}
+				       | SMALLER {fprintf(stderr, "\tbison: comp_operator:\tSMALLER\n");}
+				       | LARGER {fprintf(stderr, "\tbison: comp_operator:\tLARGER\n");}
+				       ;
+
+bool_expr: VAR_ID comp_operator VAR_ID {fprintf(stderr, "\tbison: VAR_ID comp_operator VAR_ID:\tEQUAL\n");}
+			     | number comp_operator VAR_ID {fprintf(stderr, "\tbison: number comp_operator VAR_ID:\tEQUAL\n");}
+			     | VAR_ID comp_operator number {fprintf(stderr, "\tbison: VAR_ID comp_operator number:\tEQUAL\n");}
+			     | number comp_operator number {fprintf(stderr, "\tbison: number comp_operator number:\tEQUAL\n");}
+  			   ;
+
+
+is_expr: VAR_ID IS VAR_ID {} /* TODO */
+         ;
 
 %%
 

@@ -23,7 +23,7 @@ ADD			(\+)
 SUB			(-)
 MUL			(\*)
 DIV			(\/)
-EQUALS		(=:=)
+EQUAL		(=:=)
 UNEQUAL		(=\\=)
 SMALLER_EQ	(=<)
 LARGER_EQ	(>=)
@@ -53,7 +53,7 @@ BLANK       (\s+)
 {SUB}	       {fprintf(stderr, "flex: SUB\n"); return SUB;}
 {MUL}	       {fprintf(stderr, "flex: MUL\n"); return MUL;}
 {DIV}	       {fprintf(stderr, "flex: DIV\n"); return DIV;}
-{EQUALS}	   {fprintf(stderr, "flex: EQUALS\n"); return EQUALS;}
+{EQUAL}	     {fprintf(stderr, "flex: EQUAL\n"); return EQUAL;}
 {UNEQUAL}	   {fprintf(stderr, "flex: UNEQUAL\n"); return UNEQUAL;}
 {SMALLER_EQ} {fprintf(stderr, "flex: SMALLER_EQ\n"); return SMALLER_EQ;}
 {LARGER_EQ}	 {fprintf(stderr, "flex: LARGER_EQ\n"); return LARGER_EQ;}
