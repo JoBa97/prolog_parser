@@ -2,7 +2,7 @@ all: prolog.tab.c lex.yy.c
 	g++ prolog.tab.c lex.yy.c -o prolog -lfl
 
 prolog.tab.c:
-	bison -d prolog.y
+	bison -v -d prolog.y
 
 lex.yy.c:
 	flex prolog.l
