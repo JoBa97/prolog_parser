@@ -47,6 +47,10 @@ void yyerror(const char *s) {
 
 %right UMINUS
 
+%union {
+
+}
+
 %%
 
 start:
@@ -137,6 +141,8 @@ lelement:
         | ANONYMOUS
         {fprintf(stderr, "\tbison: lelement:\tANONYMOUS\n");}
 		    | number
+        {fprintf(stderr, "\tbison: lelement:\tnumber\n");}
+        | SUB number
         {fprintf(stderr, "\tbison: lelement:\tnumber\n");}
 		    | list
         {fprintf(stderr, "\tbison: lelement:\tlist\n");}
