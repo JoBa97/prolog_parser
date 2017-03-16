@@ -23,6 +23,7 @@ ADD			(\+)
 SUB			(-)
 MUL			(\*)
 DIV			(\/)
+MOD     (mod)
 EQUAL		(=:=)
 UNEQUAL		(=\\=)
 SMALLER_EQ	(=<|<=)
@@ -36,6 +37,8 @@ BLANK       (\s+)
 
 
 {IS}	       {fprintf(stderr, "flex: IS\n"); return IS;}
+{MOD}        {fprintf(stderr, "flex: MOD\n"); return MOD;}
+
 {CONST_ID}   {fprintf(stderr, "flex: CONST_ID\n"); return CONST_ID;}
 {VAR_ID}	   {fprintf(stderr, "flex: VAR_ID\n"); return VAR_ID;}
 {INT}   	   {fprintf(stderr, "flex: INT\n"); return INT;}

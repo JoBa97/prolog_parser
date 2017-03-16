@@ -32,6 +32,7 @@ void yyerror(const char *s) {
 %token SUB
 %token MUL
 %token DIV
+%token MOD
 %token EQUAL
 %token UNEQUAL
 %token SMALLER_EQ
@@ -42,6 +43,7 @@ void yyerror(const char *s) {
 %left EQUAL UNEQUAL SMALLER SMALLER_EQ LARGER LARGER_EQ
 %left ADD SUB
 %left MUL DIV
+%left MOD
 
 %right UMINUS
 
@@ -203,11 +205,13 @@ math_operator:
         {fprintf(stderr, "\tbison: math_operator:\tDIV\n");}
 				| MUL
         {fprintf(stderr, "\tbison: math_operator:\tMUL\n");}
+        | MOD
+        {fprintf(stderr, "\tbison: math_operator:\tMOD\n");}
 				;
 
 is_expr:
           VAR_ID IS math_expr
-        {{fprintf(stderr, "\tbison: is_expr:\tVAR_ID IS math_expr\n");}} 
+        {{fprintf(stderr, "\tbison: is_expr:\tVAR_ID IS math_expr\n");}}
         ;
 
 %%
