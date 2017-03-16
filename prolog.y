@@ -175,9 +175,29 @@ bool_expr:
         {fprintf(stderr, "\tbison: bool_expr:\tmath_expr comp_operator math_expr\n");}
         ;
 
-math_expr: /* TODO */ 
-        ;
+math_expr:
+  			  number
+        {fprintf(stderr, "\tbison: math_expr:\tnumber\n");}
+  			| VAR_ID
+        {fprintf(stderr, "\tbison: math_expr:\tVAR_ID\n");}
+  			| math_expr math_operator math_expr
+        {fprintf(stderr, "\tbison: math_expr:\tmath_expr math_operator math_expr\n");}
+  			| SUB VAR_ID
+        {fprintf(stderr, "\tbison: math_expr:\tSUB VAR_ID\n");}
+  			| SUB POPEN math_expr PCLOSE
+        {fprintf(stderr, "\tbison: math_expr:\tSUB POPEN math_expr PCLOSE\n");}
+  			;
 
+math_operator:
+          ADD
+        {fprintf(stderr, "\tbison: math_operator:\tADD\n");}
+				| SUB
+        {fprintf(stderr, "\tbison: math_operator:\tSUB\n");}
+				| DIV
+        {fprintf(stderr, "\tbison: math_operator:\tDIV\n");}
+				| MUL
+        {fprintf(stderr, "\tbison: math_operator:\tMUL\n");}
+				;
 
 is_expr: VAR_ID IS VAR_ID {} /* TODO */
          ;
