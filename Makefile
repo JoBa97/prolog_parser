@@ -8,4 +8,4 @@ lex.yy.c:
 	flex prolog.l
 
 clean:
-	rm prolog prolog.tab.h prolog.tab.c lex.yy.c
+	rm prolog prolog.tab.h prolog.tab.c lex.yy.c prolog.output
