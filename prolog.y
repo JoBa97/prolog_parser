@@ -205,8 +205,10 @@ math_operator:
         {fprintf(stderr, "\tbison: math_operator:\tMUL\n");}
 				;
 
-is_expr: VAR_ID IS VAR_ID {} /* TODO */
-         ;
+is_expr:
+          VAR_ID IS math_expr
+        {{fprintf(stderr, "\tbison: is_expr:\tVAR_ID IS math_expr\n");}} 
+        ;
 
 %%
 
