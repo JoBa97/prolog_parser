@@ -39,6 +39,12 @@ void yyerror(const char *s) {
 %token SMALLER
 %token LARGER
 
+%left EQUAL UNEQUAL SMALLER SMALLER_EQ LARGER LARGER_EQ
+%left ADD SUB
+%left MUL DIV
+
+%right UMINUS
+
 %%
 
 start:
@@ -88,6 +94,8 @@ param:
         {fprintf(stderr, "\tbison: param:\tANONYMOUS\n");}
         | number
         {fprintf(stderr, "\tbison: param:\tnumber\n");}
+        | SUB number
+        {fprintf(stderr, "\tbison: param:\tSUB number\n");}
         | list
         {fprintf(stderr, "\tbison: param:\tlist\n");}
         ;
@@ -97,8 +105,6 @@ number:
         {fprintf(stderr, "\tbison: number:\tINT\n");}
         | FLOAT
         {fprintf(stderr, "\tbison: number:\tFLOAT\n");}
-        | SUB number
-        {fprintf(stderr, "\tbison: number:\tSUB number\n");}
         ;
 
 list:
@@ -180,12 +186,12 @@ math_expr:
         {fprintf(stderr, "\tbison: math_expr:\tnumber\n");}
   			| VAR_ID
         {fprintf(stderr, "\tbison: math_expr:\tVAR_ID\n");}
-  			| math_expr math_operator math_expr
+  			| math_expr math_operator math_expr %prec ADD
         {fprintf(stderr, "\tbison: math_expr:\tmath_expr math_operator math_expr\n");}
-  			| SUB VAR_ID
-        {fprintf(stderr, "\tbison: math_expr:\tSUB VAR_ID\n");}
-  			| SUB POPEN math_expr PCLOSE
-        {fprintf(stderr, "\tbison: math_expr:\tSUB POPEN math_expr PCLOSE\n");}
+  			| POPEN math_expr PCLOSE
+        {fprintf(stderr, "\tbison: math_expr:\tPOPEN math_expr PCLOSE\n");}
+  			| SUB math_expr %prec UMINUS
+        {fprintf(stderr, "\tbison: math_expr:\tSUB math_expr\n");}
   			;
 
 math_operator:
