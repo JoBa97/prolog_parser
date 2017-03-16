@@ -41,83 +41,142 @@ void yyerror(const char *s) {
 
 %%
 
-start: cmds {fprintf(stderr, "\tbison: start:\tcmds\n");}
-       ;
-
-cmds:   cmd cmds {fprintf(stderr, "\tbison: cmds:\tcmd cmds\n");}
-      | cmd     {fprintf(stderr, "\tbison: cmds:\tcmd\n");}
-      ;
-
-cmd: fact {fprintf(stderr, "\tbison: cmd:\tfact\n");}
-    | def {fprintf(stderr, "\tbison: cmd:\tdef\n");}
-    ;
-
-fact: pred DOT {fprintf(stderr, "\tbison: fact:\tpred DOT\n");}
-      ;
-
-pred: CONST_ID POPEN params PCLOSE {fprintf(stderr, "\tbison: pred:\tCONST_ID POPEN params PCLOSE\n");}
-      | CONST_ID {fprintf(stderr, "\tbison: pred:\tfCONST_ID\n");}
-      ;
-
-params: param COMMA params {fprintf(stderr, "\tbison: params:\tparam COMMA params\n");}
-        | param {fprintf(stderr, "\tbison: params:\tparam\n");}
+start:
+          cmds
+        {fprintf(stderr, "\tbison: start:\tcmds\n");}
         ;
 
-param: CONST_ID {fprintf(stderr, "\tbison: param:\tCONST_ID\n");}
-       | VAR_ID {fprintf(stderr, "\tbison: param:\tVAR_ID\n");}
-       | ANONYMOUS {fprintf(stderr, "\tbison: param:\tANONYMOUS\n");}
-       | number {fprintf(stderr, "\tbison: param:\tnumber\n");}
-       | list {fprintf(stderr, "\tbison: param:\tlist\n");}
-       ;
-
-number: INT {fprintf(stderr, "\tbison: number:\tINT\n");}
-        | FLOAT {fprintf(stderr, "\tbison: number:\tFLOAT\n");}
-        | SUB number {fprintf(stderr, "\tbison: number:\tSUB number\n");}
+cmds:
+          cmd cmds
+        {fprintf(stderr, "\tbison: cmds:\tcmd cmds\n");}
+        | cmd
+        {fprintf(stderr, "\tbison: cmds:\tcmd\n");}
         ;
 
-list: LOPEN lelements LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN lelements LCLOSE\n");}
-		  |	LOPEN lelements PIPE list LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE list LCLOSE\n");}
-		  |	LOPEN lelements PIPE VAR_ID LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE VAR_ID LCLOSE\n");}
-      |	LOPEN lelements PIPE ANONYMOUS LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE ANONYMOUS LCLOSE\n");}
-		  |	LOPEN LCLOSE {fprintf(stderr, "\tbison: list:\tLOPEN LCLOSE\n");}
-		  ;
+cmd:
+          fact
+        {fprintf(stderr, "\tbison: cmd:\tfact\n");}
+        | def
+        {fprintf(stderr, "\tbison: cmd:\tdef\n");}
+        ;
 
-lelements: lelement COMMA lelements {fprintf(stderr, "\tbison: lelements:\tlelement COMMA lelements\n");}
-			     | lelement {fprintf(stderr, "\tbison: lelements:\tlelement\n");}
-			     ;
+fact:
+          pred DOT
+        {fprintf(stderr, "\tbison: fact:\tpred DOT\n");}
+        ;
 
-lelement: CONST_ID {fprintf(stderr, "\tbison: lelement:\tCONST_ID\n");}
-          | VAR_ID {fprintf(stderr, "\tbison: lelement:\tVAR_ID\n");}
-          | ANONYMOUS {fprintf(stderr, "\tbison: lelement:\tANONYMOUS\n");}
-			    | number {fprintf(stderr, "\tbison: lelement:\tnumber\n");}
-			    | list {fprintf(stderr, "\tbison: lelement:\tlist\n");}
-			    ;
+pred:
+          CONST_ID POPEN params PCLOSE
+        {fprintf(stderr, "\tbison: pred:\tCONST_ID POPEN params PCLOSE\n");}
+        | CONST_ID
+        {fprintf(stderr, "\tbison: pred:\tfCONST_ID\n");}
+        ;
 
-def: pred DEF expressions DOT {fprintf(stderr, "\tbison: def:\tpred DEF expressions DOT\n");}
-     ;
+params:
+          param COMMA params
+        {fprintf(stderr, "\tbison: params:\tparam COMMA params\n");}
+        | param
+        {fprintf(stderr, "\tbison: params:\tparam\n");}
+        ;
 
-expressions: expression COMMA expressions {fprintf(stderr, "\tbison: expression:\texpression COMMA expressions\n");}
-             | expression {fprintf(stderr, "\tbison: expression:\texpression\n");}
-             ;
+param:
+          CONST_ID
+        {fprintf(stderr, "\tbison: param:\tCONST_ID\n");}
+        | VAR_ID
+        {fprintf(stderr, "\tbison: param:\tVAR_ID\n");}
+        | ANONYMOUS
+        {fprintf(stderr, "\tbison: param:\tANONYMOUS\n");}
+        | number
+        {fprintf(stderr, "\tbison: param:\tnumber\n");}
+        | list
+        {fprintf(stderr, "\tbison: param:\tlist\n");}
+        ;
 
-expression: pred {fprintf(stderr, "\tbison: expression:\tpred\n");}
-            | is_expr {fprintf(stderr, "\tbison: is_expr:\tpred\n");}
-            | bool_expr
-            ;
+number:
+          INT
+        {fprintf(stderr, "\tbison: number:\tINT\n");}
+        | FLOAT
+        {fprintf(stderr, "\tbison: number:\tFLOAT\n");}
+        | SUB number
+        {fprintf(stderr, "\tbison: number:\tSUB number\n");}
+        ;
 
-comp_operator: EQUAL {fprintf(stderr, "\tbison: comp_operator:\tEQUAL\n");}
-				       | UNEQUAL {fprintf(stderr, "\tbison: comp_operator:\tUNEQUAL\n");}
-				       | SMALLER_EQ {fprintf(stderr, "\tbison: comp_operator:\tSMALLER_EQ\n");}
-				       | LARGER_EQ {fprintf(stderr, "\tbison: comp_operator:\tLARGER_EQ\n");}
-				       | SMALLER {fprintf(stderr, "\tbison: comp_operator:\tSMALLER\n");}
-				       | LARGER {fprintf(stderr, "\tbison: comp_operator:\tLARGER\n");}
-				       ;
+list:
+          LOPEN lelements LCLOSE
+        {fprintf(stderr, "\tbison: list:\tLOPEN lelements LCLOSE\n");}
+  		  |	LOPEN lelements PIPE list LCLOSE
+        {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE list LCLOSE\n");}
+  		  |	LOPEN lelements PIPE VAR_ID LCLOSE
+        {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE VAR_ID LCLOSE\n");}
+        |	LOPEN lelements PIPE ANONYMOUS LCLOSE
+        {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE ANONYMOUS LCLOSE\n");}
+  		  |	LOPEN LCLOSE
+        {fprintf(stderr, "\tbison: list:\tLOPEN LCLOSE\n");}
+  		  ;
 
-bool_expr: VAR_ID comp_operator VAR_ID {fprintf(stderr, "\tbison: VAR_ID comp_operator VAR_ID:\tEQUAL\n");}
-			     | number comp_operator VAR_ID {fprintf(stderr, "\tbison: number comp_operator VAR_ID:\tEQUAL\n");}
-			     | VAR_ID comp_operator number {fprintf(stderr, "\tbison: VAR_ID comp_operator number:\tEQUAL\n");}
-			     | number comp_operator number {fprintf(stderr, "\tbison: number comp_operator number:\tEQUAL\n");}
-  			   ;
+lelements:
+          lelement COMMA lelements
+        {fprintf(stderr, "\tbison: lelements:\tlelement COMMA lelements\n");}
+        | lelement
+        {fprintf(stderr, "\tbison: lelements:\tlelement\n");}
+        ;
+
+lelement:
+          CONST_ID
+        {fprintf(stderr, "\tbison: lelement:\tCONST_ID\n");}
+        | VAR_ID
+        {fprintf(stderr, "\tbison: lelement:\tVAR_ID\n");}
+        | ANONYMOUS
+        {fprintf(stderr, "\tbison: lelement:\tANONYMOUS\n");}
+		    | number
+        {fprintf(stderr, "\tbison: lelement:\tnumber\n");}
+		    | list
+        {fprintf(stderr, "\tbison: lelement:\tlist\n");}
+		    ;
+
+def:
+          pred DEF expressions DOT
+        {fprintf(stderr, "\tbison: def:\tpred DEF expressions DOT\n");}
+        ;
+
+expressions:
+          expression COMMA expressions
+        {fprintf(stderr, "\tbison: expression:\texpression COMMA expressions\n");}
+        | expression
+        {fprintf(stderr, "\tbison: expression:\texpression\n");}
+        ;
+
+expression:
+          pred
+        {fprintf(stderr, "\tbison: expression:\tpred\n");}
+        | is_expr
+        {fprintf(stderr, "\tbison: expression:\tis_expr\n");}
+        | bool_expr
+        {fprintf(stderr, "\tbison: expression:\tbool_expr\n");}
+        ;
+
+comp_operator:
+          EQUAL
+        {fprintf(stderr, "\tbison: comp_operator:\tEQUAL\n");}
+	      | UNEQUAL
+        {fprintf(stderr, "\tbison: comp_operator:\tUNEQUAL\n");}
+	      | SMALLER_EQ
+        {fprintf(stderr, "\tbison: comp_operator:\tSMALLER_EQ\n");}
+	      | LARGER_EQ
+        {fprintf(stderr, "\tbison: comp_operator:\tLARGER_EQ\n");}
+	      | SMALLER
+        {fprintf(stderr, "\tbison: comp_operator:\tSMALLER\n");}
+	      | LARGER
+        {fprintf(stderr, "\tbison: comp_operator:\tLARGER\n");}
+	      ;
+
+bool_expr:
+          math_expr comp_operator math_expr
+        {fprintf(stderr, "\tbison: bool_expr:\tmath_expr comp_operator math_expr\n");}
+        ;
+
+math_expr: /* TODO */ 
+        ;
 
 
 is_expr: VAR_ID IS VAR_ID {} /* TODO */
