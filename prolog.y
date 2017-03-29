@@ -1,22 +1,28 @@
 %{
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
 extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern "C" int lines;
-extern "C" char* yytext;
 
 void yyerror(const char *s) {
   fprintf (stderr, "Parser error in line %d:\n%s\n", lines, s);
 }
 
+std::vector<std::string> preds;
+
+
 %}
 
+
 %token IS
-%token CONST_ID
-%token VAR_ID
+%token<text> CONST_ID
+%token<text> VAR_ID
 %token FLOAT
 %token INT
 %token ANONYMOUS
@@ -48,7 +54,7 @@ void yyerror(const char *s) {
 %right UMINUS
 
 %union {
-
+  char* text;
 }
 
 %%
@@ -79,9 +85,19 @@ fact:
 
 pred:
           CONST_ID POPEN params PCLOSE
-        {fprintf(stderr, "\tbison: pred:\tCONST_ID POPEN params PCLOSE\n");}
+        { fprintf(stderr, "\tbison: pred:\tCONST_ID POPEN params PCLOSE\n");
+          std::string sym($1);
+          free($1);
+          std::cerr << "ID: " << sym << std::endl;
+          preds.push_back(sym);
+        }
         | CONST_ID
-        {fprintf(stderr, "\tbison: pred:\tfCONST_ID\n");}
+        { fprintf(stderr, "\tbison: pred:\tfCONST_ID\n");
+          std::string sym($1);
+          free($1);
+          std::cerr << "ID: " << sym << std::endl;
+          preds.push_back(sym);
+        }
         ;
 
 params:
@@ -93,9 +109,17 @@ params:
 
 param:
           CONST_ID
-        {fprintf(stderr, "\tbison: param:\tCONST_ID\n");}
+        {fprintf(stderr, "\tbison: param:\tCONST_ID\n");
+          std::string sym($1);
+          free($1);
+          std::cerr << "ID: " << sym << std::endl;
+        }
         | VAR_ID
-        {fprintf(stderr, "\tbison: param:\tVAR_ID\n");}
+        {fprintf(stderr, "\tbison: param:\tVAR_ID\n");
+          std::string sym($1);
+          free($1);
+          std::cerr << "ID: " << sym << std::endl;
+        }
         | ANONYMOUS
         {fprintf(stderr, "\tbison: param:\tANONYMOUS\n");}
         | number
@@ -119,7 +143,11 @@ list:
   		  |	LOPEN lelements PIPE list LCLOSE
         {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE list LCLOSE\n");}
   		  |	LOPEN lelements PIPE VAR_ID LCLOSE
-        {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE VAR_ID LCLOSE\n");}
+        { fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE VAR_ID LCLOSE\n");
+          std::string sym($4);
+          free($4);
+          std::cerr << "ID: " << sym << std::endl;
+        }
         |	LOPEN lelements PIPE ANONYMOUS LCLOSE
         {fprintf(stderr, "\tbison: list:\tLOPEN lelements PIPE ANONYMOUS LCLOSE\n");}
   		  |	LOPEN LCLOSE
@@ -135,9 +163,17 @@ lelements:
 
 lelement:
           CONST_ID
-        {fprintf(stderr, "\tbison: lelement:\tCONST_ID\n");}
+        {fprintf(stderr, "\tbison: lelement:\tCONST_ID\n");
+          std::string sym($1);
+          free($1);
+          std::cerr << "ID: " << sym << std::endl;
+        }
         | VAR_ID
-        {fprintf(stderr, "\tbison: lelement:\tVAR_ID\n");}
+        {fprintf(stderr, "\tbison: lelement:\tVAR_ID\n");
+          std::string sym($1);
+          free($1);
+          std::cerr << "ID: " << sym << std::endl;
+        }
         | ANONYMOUS
         {fprintf(stderr, "\tbison: lelement:\tANONYMOUS\n");}
 		    | number
@@ -193,7 +229,11 @@ math_expr:
   			  number
         {fprintf(stderr, "\tbison: math_expr:\tnumber\n");}
   			| VAR_ID
-        {fprintf(stderr, "\tbison: math_expr:\tVAR_ID\n");}
+        {fprintf(stderr, "\tbison: math_expr:\tVAR_ID\n");
+          std::string sym($1);
+          free($1);
+          std::cerr << "ID: " << sym << std::endl;
+        }
   			| math_expr math_operator math_expr %prec ADD
         {fprintf(stderr, "\tbison: math_expr:\tmath_expr math_operator math_expr\n");}
   			| POPEN math_expr PCLOSE
@@ -217,11 +257,19 @@ math_operator:
 
 is_expr:
           VAR_ID IS math_expr
-        {{fprintf(stderr, "\tbison: is_expr:\tVAR_ID IS math_expr\n");}}
+        {fprintf(stderr, "\tbison: is_expr:\tVAR_ID IS math_expr\n");
+          std::string sym($1);
+          free($1);
+          std::cerr << "ID: " << sym << std::endl;
+        }
         ;
 
 %%
 
 int main(int, char**) {
 	yyparse();
+  std::cout << "pred list:" << std::endl;
+  for (std::vector<std::string>::iterator it = preds.begin(); it < preds.end(); it++) {
+    std::cout << *it << std::endl;
+  }
 }

@@ -1,4 +1,5 @@
 %{
+#include "string.h"
 #include "prolog.tab.h"
 #define YY_DECL extern "C" int yylex()
 int lines = 1;
@@ -33,14 +34,20 @@ LARGER		(>)
 EOL			(\n)
 BLANK       (\s+)
 
+
+
 %%
 
 
 {IS}	       {fprintf(stderr, "flex: IS\n"); return IS;}
 {MOD}        {fprintf(stderr, "flex: MOD\n"); return MOD;}
 
-{CONST_ID}   {fprintf(stderr, "flex: CONST_ID\n"); return CONST_ID;}
-{VAR_ID}	   {fprintf(stderr, "flex: VAR_ID\n"); return VAR_ID;}
+{CONST_ID}   {fprintf(stderr, "flex: CONST_ID\n");
+              yylval.text = strdup(yytext);
+              return CONST_ID;}
+{VAR_ID}	   {fprintf(stderr, "flex: VAR_ID\n");
+              yylval.text = strdup(yytext);
+              return VAR_ID;}
 {INT}   	   {fprintf(stderr, "flex: INT\n"); return INT;}
 {FLOAT}	     {fprintf(stderr, "flex: FLOAT\n"); return FLOAT;}
 {ANONYMOUS}	 {fprintf(stderr, "flex: ANONYMOUS\n"); return ANONYMOUS;}
