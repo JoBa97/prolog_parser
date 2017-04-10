@@ -1,4 +1,4 @@
 # prolog_parser
 To build:
--`make dirs`
--`make`
+1. `make dirs`
+2. `make`
