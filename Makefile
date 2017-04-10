@@ -13,10 +13,10 @@ all: generate
 
 generate: $(SRCGEN)/prolog.tab.c $(SRCGEN)/lex.yy.c
 
-$(SRCGEN)/prolog.tab.c:
+$(SRCGEN)/prolog.tab.c: .FORCE
 	bison -v -d -o $(SRCGEN)/prolog.tab.c $(SRC)/prolog.y
 
-$(SRCGEN)/lex.yy.c:
+$(SRCGEN)/lex.yy.c: .FORCE
 		flex -o $(SRCGEN)/lex.yy.c $(SRC)/prolog.l
 
 clean:
@@ -24,6 +24,7 @@ clean:
 
 dirs:
 	mkdir $(BIN) $(SRCGEN)
-	
 
-.PHONY: all clean generate dirs
+
+.PHONY: all clean generate dirs .FORCE
+FORCE:
