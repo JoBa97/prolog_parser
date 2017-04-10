@@ -1,11 +1,29 @@
-all: prolog.tab.c lex.yy.c
-	g++ prolog.tab.c lex.yy.c -o prolog -lfl
+CC=g++
+CCFLAGS=-Wall -Wextra -fno-exceptions -Wno-format -std=c++1y
+CCLIBS=-lfl
+BIN=bin
+BINNAME=prolog
+SRC=src
+SRCGEN=src_generated
+INC=include
 
-prolog.tab.c:
-	bison -v -d prolog.y
 
-lex.yy.c:
-	flex prolog.l
+all: generate
+	$(CC) $(CCFLAGS) -o $(BIN)/$(BINNAME) $(SRCGEN)/*.c -I $(INC)/ $(CCLIBS)
+
+generate: $(SRCGEN)/prolog.tab.c $(SRCGEN)/lex.yy.c
+
+$(SRCGEN)/prolog.tab.c:
+	bison -v -d -o $(SRCGEN)/prolog.tab.c $(SRC)/prolog.y
+
+$(SRCGEN)/lex.yy.c:
+		flex -o $(SRCGEN)/lex.yy.c $(SRC)/prolog.l
 
 clean:
-	rm prolog prolog.tab.h prolog.tab.c lex.yy.c prolog.output
+	rm -f $(BIN)/$(BINNAME) $(SRCGEN)/*
+
+dirs:
+	mkdir $(BIN) $(SRCGEN)
+	
+
+.PHONY: all clean generate dirs
