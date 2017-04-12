@@ -44,34 +44,34 @@ BLANK       (\s+)
 %%
 
 
-{IS}	       {DEBUG("flex: IS\n"); return IS;}
-{MOD}        {DEBUG("flex: MOD\n"); return MOD;}
+{IS}	       {DEBUG("flex: IS"); return IS;}
+{MOD}        {DEBUG("flex: MOD"); return MOD;}
 
-{CONST_ID}   {DEBUG("flex: CONST_ID\n");
+{CONST_ID}   {DEBUG("flex: CONST_ID");
               yylval.text = strdup(yytext);
               return CONST_ID;}
-{VAR_ID}	   {DEBUG("flex: VAR_ID\n");
+{VAR_ID}	   {DEBUG("flex: VAR_ID");
               yylval.text = strdup(yytext);
               return VAR_ID;}
-{INT}   	   {DEBUG("flex: INT\n"); return INT;}
-{FLOAT}	     {DEBUG("flex: FLOAT\n"); return FLOAT;}
-{ANONYMOUS}	 {DEBUG("flex: ANONYMOUS\n"); return ANONYMOUS;}
-{POPEN}	     {DEBUG("flex: POPEN\n"); return POPEN;}
-{PCLOSE}	   {DEBUG("flex: PCLOSE\n"); return PCLOSE;}
-{DOT}	       {DEBUG("flex: DOT\n"); return DOT;}
-{DEF}	       {DEBUG("flex: DEF\n"); return DEF;}
-{LOPEN}	     {DEBUG("flex: LOPEN\n"); return LOPEN;}
-{LCLOSE}	   {DEBUG("flex: LCLOSE\n"); return LCLOSE;}
-{COMMA}	     {DEBUG("flex: COMMA\n"); return COMMA;}
-{PIPE}	     {DEBUG("flex: PIPE\n"); return PIPE;}
-{ADD}	       {DEBUG("flex: ADD\n"); return ADD;}
-{SUB}	       {DEBUG("flex: SUB\n"); return SUB;}
-{MUL}	       {DEBUG("flex: MUL\n"); return MUL;}
-{DIV}	       {DEBUG("flex: DIV\n"); return DIV;}
-{EQUAL}	     {DEBUG("flex: EQUAL\n"); return EQUAL;}
-{UNEQUAL}	   {DEBUG("flex: UNEQUAL\n"); return UNEQUAL;}
-{SMALLER_EQ} {DEBUG("flex: SMALLER_EQ\n"); return SMALLER_EQ;}
-{LARGER_EQ}	 {DEBUG("flex: LARGER_EQ\n"); return LARGER_EQ;}
-{SMALLER}	   {DEBUG("flex: SMALLER\n"); return SMALLER;}
-{LARGER}	   {DEBUG("flex: LARGER\n"); return LARGER;}
-{EOL}	       {DEBUG("flex: EOL\n"); lines++;}
+{INT}   	   {DEBUG("flex: INT"); return INT;}
+{FLOAT}	     {DEBUG("flex: FLOAT"); return FLOAT;}
+{ANONYMOUS}	 {DEBUG("flex: ANONYMOUS"); return ANONYMOUS;}
+{POPEN}	     {DEBUG("flex: POPEN"); return POPEN;}
+{PCLOSE}	   {DEBUG("flex: PCLOSE"); return PCLOSE;}
+{DOT}	       {DEBUG("flex: DOT"); return DOT;}
+{DEF}	       {DEBUG("flex: DEF"); return DEF;}
+{LOPEN}	     {DEBUG("flex: LOPEN"); return LOPEN;}
+{LCLOSE}	   {DEBUG("flex: LCLOSE"); return LCLOSE;}
+{COMMA}	     {DEBUG("flex: COMMA"); return COMMA;}
+{PIPE}	     {DEBUG("flex: PIPE"); return PIPE;}
+{ADD}	       {DEBUG("flex: ADD"); return ADD;}
+{SUB}	       {DEBUG("flex: SUB"); return SUB;}
+{MUL}	       {DEBUG("flex: MUL"); return MUL;}
+{DIV}	       {DEBUG("flex: DIV"); return DIV;}
+{EQUAL}	     {DEBUG("flex: EQUAL"); return EQUAL;}
+{UNEQUAL}	   {DEBUG("flex: UNEQUAL"); return UNEQUAL;}
+{SMALLER_EQ} {DEBUG("flex: SMALLER_EQ"); return SMALLER_EQ;}
+{LARGER_EQ}	 {DEBUG("flex: LARGER_EQ"); return LARGER_EQ;}
+{SMALLER}	   {DEBUG("flex: SMALLER"); return SMALLER;}
+{LARGER}	   {DEBUG("flex: LARGER"); return LARGER;}
+{EOL}	       {DEBUG("flex: EOL"); lines++;}

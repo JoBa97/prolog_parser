@@ -14,7 +14,7 @@ extern "C" FILE *yyin;
 extern "C" int lines;
 
 void yyerror(const char *s) {
-  fprintf (stderr, "Parser error in line %d:\n%s\n", lines, s);
+  fprintf (stderr, "Parser error in line %d:\n%s", lines, s);
 }
 
 symbol_table_t symbol_table;
@@ -51,7 +51,9 @@ std::vector<std::string> vars;
 %token SMALLER
 %token LARGER
 
-%type <statement> cmd
+%type<statement> cmd
+%type<statement> fact
+%type<statement> def
 
 %left EQUAL UNEQUAL SMALLER SMALLER_EQ LARGER LARGER_EQ
 %left ADD SUB
@@ -69,51 +71,55 @@ std::vector<std::string> vars;
 
 start:
           cmds
-        {DEBUG("\tbison: start:\tcmds\n");}
+        {DEBUG("\tbison: start:\tcmds");}
         ;
 
 cmds:
           cmd cmds
-        { DEBUG("\tbison: cmds:\tcmd cmds\n");
+        { DEBUG("\tbison: cmds:\tcmd cmds");
           symbol_table.push_back(*$1);
         }
         | cmd
-        { DEBUG("\tbison: cmds:\tcmd\n");
+        { DEBUG("\tbison: cmds:\tcmd");
           symbol_table.push_back(*$1);
         }
         ;
 
 cmd:
           fact
-        { DEBUG("\tbison: cmd:\tfact\n");
-          $$ = new statement_t;
+        { DEBUG("\tbison: cmd:\tfact");
+          $$ = $1;
         }
         | def
-        { DEBUG("\tbison: cmd:\tdef\n");
-          $$ = new statement_t;
+        { DEBUG("\tbison: cmd:\tdef");
+          $$ = $1;
         }
         ;
 
 fact:
           pred DOT
-        {DEBUG("\tbison: fact:\tpred DOT\n");}
+        { DEBUG("\tbison: fact:\tpred DOT");
+          $$ = new statement_t;
+        }
         ;
 
 def:
           pred DEF expressions DOT
-        {DEBUG("\tbison: def:\tpred DEF expressions DOT\n");}
+        { DEBUG("\tbison: def:\tpred DEF expressions DOT");
+          $$ = new statement_t;
+        }
         ;
 
 pred:
           CONST_ID POPEN params PCLOSE
-        { DEBUG("\tbison: pred:\tCONST_ID POPEN params PCLOSE\n");
+        { DEBUG("\tbison: pred:\tCONST_ID POPEN params PCLOSE");
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
           preds.push_back(sym);
         }
         | CONST_ID
-        { DEBUG("\tbison: pred:\tfCONST_ID\n");
+        { DEBUG("\tbison: pred:\tfCONST_ID");
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
@@ -123,159 +129,159 @@ pred:
 
 params:
           param COMMA params
-        {DEBUG("\tbison: params:\tparam COMMA params\n");}
+        {DEBUG("\tbison: params:\tparam COMMA params");}
         | param
-        {DEBUG("\tbison: params:\tparam\n");}
+        {DEBUG("\tbison: params:\tparam");}
         ;
 
 param:
           CONST_ID
-        {DEBUG("\tbison: param:\tCONST_ID\n");
+        {DEBUG("\tbison: param:\tCONST_ID");
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
         }
         | VAR_ID
-        {DEBUG("\tbison: param:\tVAR_ID\n");
+        {DEBUG("\tbison: param:\tVAR_ID");
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
         }
         | ANONYMOUS
-        {DEBUG("\tbison: param:\tANONYMOUS\n");}
+        {DEBUG("\tbison: param:\tANONYMOUS");}
         | number
-        {DEBUG("\tbison: param:\tnumber\n");}
+        {DEBUG("\tbison: param:\tnumber");}
         | SUB number
-        {DEBUG("\tbison: param:\tSUB number\n");}
+        {DEBUG("\tbison: param:\tSUB number");}
         | list
-        {DEBUG("\tbison: param:\tlist\n");}
+        {DEBUG("\tbison: param:\tlist");}
         ;
 
 number:
           INT
-        {DEBUG("\tbison: number:\tINT\n");}
+        {DEBUG("\tbison: number:\tINT");}
         | FLOAT
-        {DEBUG("\tbison: number:\tFLOAT\n");}
+        {DEBUG("\tbison: number:\tFLOAT");}
         ;
 
 list:
           LOPEN lelements LCLOSE
-        {DEBUG("\tbison: list:\tLOPEN lelements LCLOSE\n");}
+        {DEBUG("\tbison: list:\tLOPEN lelements LCLOSE");}
   		  |	LOPEN lelements PIPE list LCLOSE
-        {DEBUG("\tbison: list:\tLOPEN lelements PIPE list LCLOSE\n");}
+        {DEBUG("\tbison: list:\tLOPEN lelements PIPE list LCLOSE");}
   		  |	LOPEN lelements PIPE VAR_ID LCLOSE
-        { DEBUG("\tbison: list:\tLOPEN lelements PIPE VAR_ID LCLOSE\n");
+        { DEBUG("\tbison: list:\tLOPEN lelements PIPE VAR_ID LCLOSE");
           std::string sym($4);
           free($4);
           std::cerr << "ID: " << sym << std::endl;
         }
         |	LOPEN lelements PIPE ANONYMOUS LCLOSE
-        {DEBUG("\tbison: list:\tLOPEN lelements PIPE ANONYMOUS LCLOSE\n");}
+        {DEBUG("\tbison: list:\tLOPEN lelements PIPE ANONYMOUS LCLOSE");}
   		  |	LOPEN LCLOSE
-        {DEBUG("\tbison: list:\tLOPEN LCLOSE\n");}
+        {DEBUG("\tbison: list:\tLOPEN LCLOSE");}
   		  ;
 
 lelements:
           lelement COMMA lelements
-        {DEBUG("\tbison: lelements:\tlelement COMMA lelements\n");}
+        {DEBUG("\tbison: lelements:\tlelement COMMA lelements");}
         | lelement
-        {DEBUG("\tbison: lelements:\tlelement\n");}
+        {DEBUG("\tbison: lelements:\tlelement");}
         ;
 
 lelement:
           CONST_ID
-        {DEBUG("\tbison: lelement:\tCONST_ID\n");
+        {DEBUG("\tbison: lelement:\tCONST_ID");
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
         }
         | VAR_ID
-        {DEBUG("\tbison: lelement:\tVAR_ID\n");
+        {DEBUG("\tbison: lelement:\tVAR_ID");
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
         }
         | ANONYMOUS
-        {DEBUG("\tbison: lelement:\tANONYMOUS\n");}
+        {DEBUG("\tbison: lelement:\tANONYMOUS");}
 		    | number
-        {DEBUG("\tbison: lelement:\tnumber\n");}
+        {DEBUG("\tbison: lelement:\tnumber");}
         | SUB number
-        {DEBUG("\tbison: lelement:\tnumber\n");}
+        {DEBUG("\tbison: lelement:\tnumber");}
 		    | list
-        {DEBUG("\tbison: lelement:\tlist\n");}
+        {DEBUG("\tbison: lelement:\tlist");}
 		    ;
 
 
 
 expressions:
           expression COMMA expressions
-        {DEBUG("\tbison: expression:\texpression COMMA expressions\n");}
+        {DEBUG("\tbison: expression:\texpression COMMA expressions");}
         | expression
-        {DEBUG("\tbison: expression:\texpression\n");}
+        {DEBUG("\tbison: expression:\texpression");}
         ;
 
 expression:
           pred
-        {DEBUG("\tbison: expression:\tpred\n");}
+        {DEBUG("\tbison: expression:\tpred");}
         | is_expr
-        {DEBUG("\tbison: expression:\tis_expr\n");}
+        {DEBUG("\tbison: expression:\tis_expr");}
         | bool_expr
-        {DEBUG("\tbison: expression:\tbool_expr\n");}
+        {DEBUG("\tbison: expression:\tbool_expr");}
         ;
 
 comp_operator:
           EQUAL
-        {DEBUG("\tbison: comp_operator:\tEQUAL\n");}
+        {DEBUG("\tbison: comp_operator:\tEQUAL");}
 	      | UNEQUAL
-        {DEBUG("\tbison: comp_operator:\tUNEQUAL\n");}
+        {DEBUG("\tbison: comp_operator:\tUNEQUAL");}
 	      | SMALLER_EQ
-        {DEBUG("\tbison: comp_operator:\tSMALLER_EQ\n");}
+        {DEBUG("\tbison: comp_operator:\tSMALLER_EQ");}
 	      | LARGER_EQ
-        {DEBUG("\tbison: comp_operator:\tLARGER_EQ\n");}
+        {DEBUG("\tbison: comp_operator:\tLARGER_EQ");}
 	      | SMALLER
-        {DEBUG("\tbison: comp_operator:\tSMALLER\n");}
+        {DEBUG("\tbison: comp_operator:\tSMALLER");}
 	      | LARGER
-        {DEBUG("\tbison: comp_operator:\tLARGER\n");}
+        {DEBUG("\tbison: comp_operator:\tLARGER");}
 	      ;
 
 bool_expr:
           math_expr comp_operator math_expr
-        {DEBUG("\tbison: bool_expr:\tmath_expr comp_operator math_expr\n");}
+        {DEBUG("\tbison: bool_expr:\tmath_expr comp_operator math_expr");}
         ;
 
 math_expr:
   			  number
-        {DEBUG("\tbison: math_expr:\tnumber\n");}
+        {DEBUG("\tbison: math_expr:\tnumber");}
   			| VAR_ID
-        {DEBUG("\tbison: math_expr:\tVAR_ID\n");
+        {DEBUG("\tbison: math_expr:\tVAR_ID");
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
         }
   			| math_expr math_operator math_expr %prec ADD
-        {DEBUG("\tbison: math_expr:\tmath_expr math_operator math_expr\n");}
+        {DEBUG("\tbison: math_expr:\tmath_expr math_operator math_expr");}
   			| POPEN math_expr PCLOSE
-        {DEBUG("\tbison: math_expr:\tPOPEN math_expr PCLOSE\n");}
+        {DEBUG("\tbison: math_expr:\tPOPEN math_expr PCLOSE");}
   			| SUB math_expr %prec UMINUS
-        {DEBUG("\tbison: math_expr:\tSUB math_expr\n");}
+        {DEBUG("\tbison: math_expr:\tSUB math_expr");}
   			;
 
 math_operator:
           ADD
-        {DEBUG("\tbison: math_operator:\tADD\n");}
+        {DEBUG("\tbison: math_operator:\tADD");}
 				| SUB
-        {DEBUG("\tbison: math_operator:\tSUB\n");}
+        {DEBUG("\tbison: math_operator:\tSUB");}
 				| DIV
-        {DEBUG("\tbison: math_operator:\tDIV\n");}
+        {DEBUG("\tbison: math_operator:\tDIV");}
 				| MUL
-        {DEBUG("\tbison: math_operator:\tMUL\n");}
+        {DEBUG("\tbison: math_operator:\tMUL");}
         | MOD
-        {DEBUG("\tbison: math_operator:\tMOD\n");}
+        {DEBUG("\tbison: math_operator:\tMOD");}
 				;
 
 is_expr:
           VAR_ID IS math_expr
-        {DEBUG("\tbison: is_expr:\tVAR_ID IS math_expr\n");
+        {DEBUG("\tbison: is_expr:\tVAR_ID IS math_expr");
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
@@ -287,6 +293,16 @@ is_expr:
 int main(int, char**) {
 	yyparse();
   DEBUG("symbol table size: " << symbol_table.size());
+  NamedId nid = next_id(std::string("hallo"));
+  DEBUG("1 test nid: [" << nid.id << ", " << nid.name << "]");
+  nid = next_id(std::string("nope"));
+  DEBUG("2 test nid: [" << nid.id << ", " << nid.name << "]");
+
+  DEBUG("symbol table:");
+  for(auto& elem: symbol_table) {
+    DEBUG("table entry size: " << elem.size());
+  }
+
   //std::cout << "pred list:" << std::endl;
   //for (std::vector<std::string>::iterator it = preds.begin(); it < preds.end(); it++) {
   //  std::cout << *it << std::endl;

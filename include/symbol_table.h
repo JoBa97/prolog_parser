@@ -21,7 +21,8 @@ std::map<
     std::set<var_t>,
     std::set<const_t>
   >
-> statement_t; 
+> statement_t;
+//TODO "statement" might be ambigiuos since it can also be used for other things
 
 typedef std::vector<
   statement_t
