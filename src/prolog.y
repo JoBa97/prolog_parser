@@ -4,6 +4,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+#include <set>
+#include <utility>
 
 #include "debug.h"
 
@@ -15,6 +18,28 @@ extern "C" int lines;
 void yyerror(const char *s) {
   fprintf (stderr, "Parser error in line %d:\n%s\n", lines, s);
 }
+
+struct NamedId {
+  int id;
+  std::string name;
+};
+
+typedef NamedId lit_t, var_t, const_t;
+
+int id_counter = 0;
+NamedId next_id(std::string name) {
+  return NamedId { id_counter++, name};
+}
+
+std::vector<
+  std::map<
+    lit_t,
+    std::pair<
+      std::set<var_t>,
+      std::set<const_t>
+    >
+  >
+> symbol_table;
 
 std::vector<std::string> preds;
 std::vector<std::string> vars;
@@ -272,8 +297,8 @@ is_expr:
 
 int main(int, char**) {
 	yyparse();
-  std::cout << "pred list:" << std::endl;
-  for (std::vector<std::string>::iterator it = preds.begin(); it < preds.end(); it++) {
-    std::cout << *it << std::endl;
-  }
+  //std::cout << "pred list:" << std::endl;
+  //for (std::vector<std::string>::iterator it = preds.begin(); it < preds.end(); it++) {
+  //  std::cout << *it << std::endl;
+  //}
 }
