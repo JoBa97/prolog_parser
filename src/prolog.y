@@ -19,9 +19,6 @@ void yyerror(const char *s) {
 
 symbol_table_t symbol_table;
 
-std::vector<std::string> preds;
-std::vector<std::string> vars;
-
 %}
 
 
@@ -55,6 +52,8 @@ std::vector<std::string> vars;
 %type<lit_info> fact
 %type<lit_info> def
 %type<lit_info> pred
+%type<var_info> params
+%type<var_info> param
 
 %left EQUAL UNEQUAL SMALLER SMALLER_EQ LARGER LARGER_EQ
 %left ADD SUB
@@ -66,6 +65,7 @@ std::vector<std::string> vars;
 %union {
   char* text;
   lit_info_t* lit_info;
+  var_info_t* var_info;
 }
 
 %%
@@ -107,8 +107,9 @@ fact:
 def:
           pred DEF expressions DOT
         { DEBUG("\tbison: def:\tpred DEF expressions DOT");
-          $$ = new lit_info_t;
+          //$$ = new lit_info_t;
           //TODO join pred, exprs
+          $$ = $1;
         }
         ;
 
@@ -118,15 +119,17 @@ pred:
           std::string sym($1);
           free($1);
           DEBUG("ID: " << sym);
-          preds.push_back(sym);
-          //TODO build info
+          lit_info_t* info = new lit_info_t;
+          lit_id_t id = next_id(sym);
+          var_info_t vars = *$3; //build info from params
+          info->insert(std::pair<lit_id_t, var_info_t>(id, vars));
+          $$ = info;
         }
         | CONST_ID
         { DEBUG("\tbison: pred:\tfCONST_ID");
           std::string sym($1);
           free($1);
           DEBUG("ID: " << sym);
-          preds.push_back(sym);
           lit_info_t* info = new lit_info_t;
           lit_id_t id = next_id(sym);
           // insert empty var info
@@ -137,9 +140,17 @@ pred:
 
 params:
           param COMMA params
-        {DEBUG("\tbison: params:\tparam COMMA params");}
+        { DEBUG("\tbison: params:\tparam COMMA params");
+          // join the two sets
+          $1->first.insert($3->first.begin(), $3->first.end());
+          $1->second.insert($3->second.begin(), $3->second.end());
+          delete $3;
+          $$ = $1;
+        }
         | param
-        {DEBUG("\tbison: params:\tparam");}
+        { DEBUG("\tbison: params:\tparam");
+          $$ = $1;
+        }
         ;
 
 param:
@@ -148,21 +159,40 @@ param:
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
+          //TODO fill one set with one var_id/const/anon/number
+          var_info_t* vars = new var_info_t;
+          var_id_t id = next_id(sym);
+          DEBUG("paramID: " << id.repr());
+          vars->second.insert(id);
+          $$ = vars;
         }
         | VAR_ID
         {DEBUG("\tbison: param:\tVAR_ID");
           std::string sym($1);
           free($1);
           std::cerr << "ID: " << sym << std::endl;
+          var_info_t* vars = new var_info_t;
+          var_id_t id = next_id(sym);
+          DEBUG("paramID: " << id.repr());
+          vars->first.insert(id);
+          $$ = vars;
         }
         | ANONYMOUS
-        {DEBUG("\tbison: param:\tANONYMOUS");}
+        { DEBUG("\tbison: param:\tANONYMOUS");
+          $$ = new var_info_t();
+        }
         | number
-        {DEBUG("\tbison: param:\tnumber");}
+        { DEBUG("\tbison: param:\tnumber");
+          $$ = new var_info_t();
+        }
         | SUB number
-        {DEBUG("\tbison: param:\tSUB number");}
+        { DEBUG("\tbison: param:\tSUB number");
+          $$ = new var_info_t();
+        }
         | list
-        {DEBUG("\tbison: param:\tlist");}
+        { DEBUG("\tbison: param:\tlist");
+          $$ = new var_info_t();
+        }
         ;
 
 number:
@@ -304,6 +334,7 @@ int main(int, char**) {
   DEBUG("");
   DEBUG("symbol table size: " << symbol_table.size());
   DEBUG("symbol table:");
+  //it was reduced bottom to top
   std::reverse(symbol_table.begin(), symbol_table.end());
   for(auto& elem: symbol_table) {
     DEBUG("symbol table entry size: " << elem.size());

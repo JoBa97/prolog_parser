@@ -34,8 +34,8 @@ typedef NamedId lit_id_t, var_id_t, const_id_t;
 
 typedef
 std::pair<
-  std::set<var_id_t>,
-  std::set<const_id_t>
+  std::set<var_id_t, NamedIdCompare>,
+  std::set<const_id_t, NamedIdCompare>
 > var_info_t;
 
 typedef
