@@ -300,16 +300,24 @@ is_expr:
 
 int main(int, char**) {
 	yyparse();
-  DEBUG("symbol table size: " << symbol_table.size());
-  NamedId nid = next_id(std::string("hallo"));
-  DEBUG("1 test nid: [" << nid.id << ", " << nid.name << "]");
-  nid = next_id(std::string("nope"));
-  DEBUG("2 test nid: [" << nid.id << ", " << nid.name << "]");
 
+  DEBUG("");
+  DEBUG("symbol table size: " << symbol_table.size());
   DEBUG("symbol table:");
   std::reverse(symbol_table.begin(), symbol_table.end());
   for(auto& elem: symbol_table) {
-    DEBUG("table entry size: " << elem.size());
+    DEBUG("symbol table entry size: " << elem.size());
+    for(auto& entry: elem) {
+      DEBUG("entry key: " << entry.first.repr());
+      DEBUG("entry value var set size: " << entry.second.first.size());
+      for(auto& var_id: entry.second.first) {
+        DEBUG("var_id: " << var_id.repr());
+      }
+      DEBUG("entry value const set size: " << entry.second.second.size());
+      for(auto& const_id: entry.second.second) {
+        DEBUG("const_id: " << const_id.repr());
+      }
+    }
   }
 
 }

@@ -11,6 +11,16 @@
 struct NamedId {
   int id;
   std::string name;
+
+  std::string repr() const {
+    std::string s("NamedId[");
+    s+= std::to_string(id);
+    s+= ", ";
+    s+= name;
+    s+= ']';
+    return s;
+  }
+
 };
 
 struct NamedIdCompare {
