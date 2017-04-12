@@ -4,11 +4,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <map>
-#include <set>
-#include <utility>
 
 #include "debug.h"
+#include "symbol_table.h"
 
 extern "C" int yylex();
 extern "C" int yyparse();
@@ -19,27 +17,7 @@ void yyerror(const char *s) {
   fprintf (stderr, "Parser error in line %d:\n%s\n", lines, s);
 }
 
-struct NamedId {
-  int id;
-  std::string name;
-};
-
-typedef NamedId lit_t, var_t, const_t;
-
-int id_counter = 0;
-NamedId next_id(std::string name) {
-  return NamedId { id_counter++, name};
-}
-
-std::vector<
-  std::map<
-    lit_t,
-    std::pair<
-      std::set<var_t>,
-      std::set<const_t>
-    >
-  >
-> symbol_table;
+symbol_table_t symbol_table;
 
 std::vector<std::string> preds;
 std::vector<std::string> vars;
@@ -73,6 +51,8 @@ std::vector<std::string> vars;
 %token SMALLER
 %token LARGER
 
+%type <statement> cmd
+
 %left EQUAL UNEQUAL SMALLER SMALLER_EQ LARGER LARGER_EQ
 %left ADD SUB
 %left MUL DIV
@@ -82,6 +62,7 @@ std::vector<std::string> vars;
 
 %union {
   char* text;
+  statement_t* statement;
 }
 
 %%
@@ -93,16 +74,24 @@ start:
 
 cmds:
           cmd cmds
-        {DEBUG("\tbison: cmds:\tcmd cmds\n");}
+        { DEBUG("\tbison: cmds:\tcmd cmds\n");
+          symbol_table.push_back(*$1);
+        }
         | cmd
-        {DEBUG("\tbison: cmds:\tcmd\n");}
+        { DEBUG("\tbison: cmds:\tcmd\n");
+          symbol_table.push_back(*$1);
+        }
         ;
 
 cmd:
           fact
-        {DEBUG("\tbison: cmd:\tfact\n");}
+        { DEBUG("\tbison: cmd:\tfact\n");
+          $$ = new statement_t;
+        }
         | def
-        {DEBUG("\tbison: cmd:\tdef\n");}
+        { DEBUG("\tbison: cmd:\tdef\n");
+          $$ = new statement_t;
+        }
         ;
 
 fact:
@@ -297,6 +286,7 @@ is_expr:
 
 int main(int, char**) {
 	yyparse();
+  DEBUG("symbol table size: " << symbol_table.size());
   //std::cout << "pred list:" << std::endl;
   //for (std::vector<std::string>::iterator it = preds.begin(); it < preds.end(); it++) {
   //  std::cout << *it << std::endl;

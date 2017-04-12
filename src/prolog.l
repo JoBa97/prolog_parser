@@ -1,7 +1,11 @@
 %{
 #include <string.h>
-#include "prolog.tab.h"
+
 #include "debug.h"
+#include "symbol_table.h"
+
+#include "prolog.tab.h" /* must be the last include because why not */
+
 #define YY_DECL extern "C" int yylex()
 int lines = 1;
 %}

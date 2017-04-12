@@ -9,7 +9,7 @@ INC=include
 
 
 all: generate
-	$(CC) $(CCFLAGS) -o $(BIN)/$(BINNAME) $(SRCGEN)/*.c -I $(INC)/ $(CCLIBS)
+	$(CC) $(CCFLAGS) -o $(BIN)/$(BINNAME) $(SRC)/*.cpp $(SRCGEN)/*.c -I $(INC)/ $(CCLIBS)
 
 generate: $(SRCGEN)/prolog.tab.c $(SRCGEN)/lex.yy.c
 
@@ -20,7 +20,7 @@ $(SRCGEN)/lex.yy.c: .FORCE
 		flex -o $(SRCGEN)/lex.yy.c $(SRC)/prolog.l
 
 clean:
-	rm -f $(BIN)/$(BINNAME) $(SRCGEN)/*
+	rm -f $(BIN)/* $(SRCGEN)/*
 
 dirs:
 	mkdir $(BIN) $(SRCGEN)
