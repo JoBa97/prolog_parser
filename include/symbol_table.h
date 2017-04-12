@@ -6,26 +6,37 @@
 #include <map>
 #include <set>
 #include <utility>
+#include <algorithm>
 
 struct NamedId {
   int id;
   std::string name;
 };
 
-typedef NamedId lit_t, var_t, const_t;
+struct NamedIdCompare {
+  bool operator() (const NamedId& lhs, const NamedId& rhs) const
+  {
+    return lhs.id < rhs.id;
+  }
+};
+
+typedef NamedId lit_id_t, var_id_t, const_id_t;
+
+typedef
+std::pair<
+  std::set<var_id_t>,
+  std::set<const_id_t>
+> var_info_t;
 
 typedef
 std::map<
-  lit_t,
-  std::pair<
-    std::set<var_t>,
-    std::set<const_t>
-  >
-> statement_t;
-//TODO "statement" might be ambigiuos since it can also be used for other things
+  lit_id_t,
+  var_info_t,
+  NamedIdCompare
+> lit_info_t;
 
 typedef std::vector<
-  statement_t
+  lit_info_t
 > symbol_table_t;
 
 NamedId next_id(std::string name);

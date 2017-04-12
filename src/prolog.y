@@ -51,9 +51,10 @@ std::vector<std::string> vars;
 %token SMALLER
 %token LARGER
 
-%type<statement> cmd
-%type<statement> fact
-%type<statement> def
+%type<lit_info> cmd
+%type<lit_info> fact
+%type<lit_info> def
+%type<lit_info> pred
 
 %left EQUAL UNEQUAL SMALLER SMALLER_EQ LARGER LARGER_EQ
 %left ADD SUB
@@ -64,7 +65,7 @@ std::vector<std::string> vars;
 
 %union {
   char* text;
-  statement_t* statement;
+  lit_info_t* lit_info;
 }
 
 %%
@@ -99,14 +100,15 @@ cmd:
 fact:
           pred DOT
         { DEBUG("\tbison: fact:\tpred DOT");
-          $$ = new statement_t;
+          $$ = $1;
         }
         ;
 
 def:
           pred DEF expressions DOT
         { DEBUG("\tbison: def:\tpred DEF expressions DOT");
-          $$ = new statement_t;
+          $$ = new lit_info_t;
+          //TODO join pred, exprs
         }
         ;
 
@@ -115,15 +117,21 @@ pred:
         { DEBUG("\tbison: pred:\tCONST_ID POPEN params PCLOSE");
           std::string sym($1);
           free($1);
-          std::cerr << "ID: " << sym << std::endl;
+          DEBUG("ID: " << sym);
           preds.push_back(sym);
+          //TODO build info
         }
         | CONST_ID
         { DEBUG("\tbison: pred:\tfCONST_ID");
           std::string sym($1);
           free($1);
-          std::cerr << "ID: " << sym << std::endl;
+          DEBUG("ID: " << sym);
           preds.push_back(sym);
+          lit_info_t* info = new lit_info_t;
+          lit_id_t id = next_id(sym);
+          // insert empty var info
+          info->insert(std::pair<lit_id_t, var_info_t>(id, var_info_t()));
+          $$ = info;
         }
         ;
 
@@ -299,12 +307,9 @@ int main(int, char**) {
   DEBUG("2 test nid: [" << nid.id << ", " << nid.name << "]");
 
   DEBUG("symbol table:");
+  std::reverse(symbol_table.begin(), symbol_table.end());
   for(auto& elem: symbol_table) {
     DEBUG("table entry size: " << elem.size());
   }
 
-  //std::cout << "pred list:" << std::endl;
-  //for (std::vector<std::string>::iterator it = preds.begin(); it < preds.end(); it++) {
-  //  std::cout << *it << std::endl;
-  //}
 }
