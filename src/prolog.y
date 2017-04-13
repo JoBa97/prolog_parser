@@ -314,6 +314,7 @@ bool_expr:
 math_expr:
   			  number
         { DEBUG("\tbison: math_expr:\tnumber");
+          //TODO think about numbers
           $$ = new var_info_t();
         }
   			| VAR_ID
@@ -321,19 +322,25 @@ math_expr:
           std::string sym($1);
           free($1);
           DEBUG("ID: " << sym);
-          $$ = new var_info_t(); //TODO insert
+          var_info_t* info = new var_info_t();
+          info->first.insert(next_id(sym));
+          $$ = info;
         }
   			| math_expr math_operator math_expr %prec ADD
         { DEBUG("\tbison: math_expr:\tmath_expr math_operator math_expr");
-          $$ = new var_info_t();
+          // join the two sets
+          $1->first.insert($3->first.begin(), $3->first.end());
+          $1->second.insert($3->second.begin(), $3->second.end());
+          delete $3;
+          $$ = $1;
         }
   			| POPEN math_expr PCLOSE
         { DEBUG("\tbison: math_expr:\tPOPEN math_expr PCLOSE");
-          $$ = new var_info_t();
+          $$ = $2;
         }
   			| SUB math_expr %prec UMINUS
         { DEBUG("\tbison: math_expr:\tSUB math_expr");
-          $$ = new var_info_t();
+          $$ = $2;
         }
   			;
 
