@@ -1,3 +1,4 @@
-asd.
-as.
-as(A, a).
+test1.
+test.
+test(A, a).
+test2(A,B):-test(A,B).

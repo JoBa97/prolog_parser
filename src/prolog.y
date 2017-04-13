@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include "debug.h"
 #include "symbol_table.h"
@@ -18,6 +17,9 @@ void yyerror(const char *s) {
 }
 
 symbol_table_t symbol_table;
+
+//TODO all variables have different ids
+//TODO equals, neat to be unified
 
 %}
 
@@ -52,8 +54,11 @@ symbol_table_t symbol_table;
 %type<lit_info> fact
 %type<lit_info> def
 %type<lit_info> pred
+%type<lit_info> expressions
+%type<lit_info> expression
 %type<var_info> params
 %type<var_info> param
+
 
 %left EQUAL UNEQUAL SMALLER SMALLER_EQ LARGER LARGER_EQ
 %left ADD SUB
@@ -107,7 +112,6 @@ fact:
 def:
           pred DEF expressions DOT
         { DEBUG("\tbison: def:\tpred DEF expressions DOT");
-          //$$ = new lit_info_t;
           //TODO join pred, exprs
           $$ = $1;
         }
@@ -253,9 +257,15 @@ lelement:
 
 expressions:
           expression COMMA expressions
-        {DEBUG("\tbison: expression:\texpression COMMA expressions");}
+        { DEBUG("\tbison: expression:\texpression COMMA expressions");
+          //TODO join sets
+          $$ = new lit_info_t();
+        }
         | expression
-        {DEBUG("\tbison: expression:\texpression");}
+        { DEBUG("\tbison: expression:\texpression");
+          //TODO get from expression
+          $$ = new lit_info_t();
+        }
         ;
 
 expression:
@@ -336,7 +346,7 @@ int main(int, char**) {
   DEBUG("symbol table:");
   //it was reduced bottom to top
   std::reverse(symbol_table.begin(), symbol_table.end());
-  for(auto& elem: symbol_table) {
+  /*for(auto& elem: symbol_table) {
     DEBUG("symbol table entry size: " << elem.size());
     for(auto& entry: elem) {
       DEBUG("entry key: " << entry.first.repr());
@@ -349,6 +359,7 @@ int main(int, char**) {
         DEBUG("const_id: " << const_id.repr());
       }
     }
-  }
+  }*/
+  print_symbol_table(symbol_table);
 
 }

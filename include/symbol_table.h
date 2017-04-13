@@ -1,6 +1,7 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <map>
@@ -13,11 +14,11 @@ struct NamedId {
   std::string name;
 
   std::string repr() const {
-    std::string s("NamedId[");
+    std::string s("NamedId(");
     s+= std::to_string(id);
     s+= ", ";
     s+= name;
-    s+= ']';
+    s+= ')';
     return s;
   }
 
@@ -50,5 +51,7 @@ typedef std::vector<
 > symbol_table_t;
 
 NamedId next_id(std::string name);
+
+void print_symbol_table(symbol_table_t& symbol_table);
 
 #endif /* SYMBOL_TABLE_H */
