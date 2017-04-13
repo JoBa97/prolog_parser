@@ -1,4 +1,6 @@
-test1.
-test.
+asdf.
 test(A, a).
 test2(A,B):-test(A,B).
+test2(A, A):-test(A, a).
+test3:-test(a, b), test2(b, c).
+test4(X):- X is 3.

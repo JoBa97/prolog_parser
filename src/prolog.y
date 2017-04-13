@@ -19,7 +19,7 @@ void yyerror(const char *s) {
 symbol_table_t symbol_table;
 
 //TODO all variables have different ids
-//TODO equals, neat to be unified
+//TODO equals, need to be unified
 
 %}
 
@@ -56,9 +56,12 @@ symbol_table_t symbol_table;
 %type<lit_info> pred
 %type<lit_info> expressions
 %type<lit_info> expression
+%type<lit_info> is_expr
+%type<lit_info> bool_expr
+
 %type<var_info> params
 %type<var_info> param
-
+%type<var_info> math_expr
 
 %left EQUAL UNEQUAL SMALLER SMALLER_EQ LARGER LARGER_EQ
 %left ADD SUB
@@ -112,7 +115,9 @@ fact:
 def:
           pred DEF expressions DOT
         { DEBUG("\tbison: def:\tpred DEF expressions DOT");
-          //TODO join pred, exprs
+          // join pred, exprs
+          $1->insert($3->begin(), $3->end());
+          delete $3;
           $$ = $1;
         }
         ;
@@ -162,8 +167,7 @@ param:
         {DEBUG("\tbison: param:\tCONST_ID");
           std::string sym($1);
           free($1);
-          std::cerr << "ID: " << sym << std::endl;
-          //TODO fill one set with one var_id/const/anon/number
+          DEBUG("ID: " << sym);
           var_info_t* vars = new var_info_t;
           var_id_t id = next_id(sym);
           DEBUG("paramID: " << id.repr());
@@ -174,7 +178,7 @@ param:
         {DEBUG("\tbison: param:\tVAR_ID");
           std::string sym($1);
           free($1);
-          std::cerr << "ID: " << sym << std::endl;
+          DEBUG("ID: " << sym);
           var_info_t* vars = new var_info_t;
           var_id_t id = next_id(sym);
           DEBUG("paramID: " << id.repr());
@@ -183,6 +187,7 @@ param:
         }
         | ANONYMOUS
         { DEBUG("\tbison: param:\tANONYMOUS");
+          //TODO think about numbers and anons and lists
           $$ = new var_info_t();
         }
         | number
@@ -258,23 +263,30 @@ lelement:
 expressions:
           expression COMMA expressions
         { DEBUG("\tbison: expression:\texpression COMMA expressions");
-          //TODO join sets
-          $$ = new lit_info_t();
+          //join sets
+          $1->insert($3->begin(), $3->end());
+          delete $3;
+          $$ = $1;
         }
         | expression
         { DEBUG("\tbison: expression:\texpression");
-          //TODO get from expression
-          $$ = new lit_info_t();
+          $$ = $1;
         }
         ;
 
 expression:
           pred
-        {DEBUG("\tbison: expression:\tpred");}
+        { DEBUG("\tbison: expression:\tpred");
+          $$ = $1;
+        }
         | is_expr
-        {DEBUG("\tbison: expression:\tis_expr");}
+        { DEBUG("\tbison: expression:\tis_expr");
+          $$ = $1;
+        }
         | bool_expr
-        {DEBUG("\tbison: expression:\tbool_expr");}
+        { DEBUG("\tbison: expression:\tbool_expr");
+          $$ = $1;
+        }
         ;
 
 comp_operator:
@@ -294,24 +306,35 @@ comp_operator:
 
 bool_expr:
           math_expr comp_operator math_expr
-        {DEBUG("\tbison: bool_expr:\tmath_expr comp_operator math_expr");}
+        { DEBUG("\tbison: bool_expr:\tmath_expr comp_operator math_expr");
+          $$ = new lit_info_t();
+        }
         ;
 
 math_expr:
   			  number
-        {DEBUG("\tbison: math_expr:\tnumber");}
+        { DEBUG("\tbison: math_expr:\tnumber");
+          $$ = new var_info_t();
+        }
   			| VAR_ID
-        {DEBUG("\tbison: math_expr:\tVAR_ID");
+        { DEBUG("\tbison: math_expr:\tVAR_ID");
           std::string sym($1);
           free($1);
-          std::cerr << "ID: " << sym << std::endl;
+          DEBUG("ID: " << sym);
+          $$ = new var_info_t(); //TODO insert
         }
   			| math_expr math_operator math_expr %prec ADD
-        {DEBUG("\tbison: math_expr:\tmath_expr math_operator math_expr");}
+        { DEBUG("\tbison: math_expr:\tmath_expr math_operator math_expr");
+          $$ = new var_info_t();
+        }
   			| POPEN math_expr PCLOSE
-        {DEBUG("\tbison: math_expr:\tPOPEN math_expr PCLOSE");}
+        { DEBUG("\tbison: math_expr:\tPOPEN math_expr PCLOSE");
+          $$ = new var_info_t();
+        }
   			| SUB math_expr %prec UMINUS
-        {DEBUG("\tbison: math_expr:\tSUB math_expr");}
+        { DEBUG("\tbison: math_expr:\tSUB math_expr");
+          $$ = new var_info_t();
+        }
   			;
 
 math_operator:
@@ -329,10 +352,16 @@ math_operator:
 
 is_expr:
           VAR_ID IS math_expr
-        {DEBUG("\tbison: is_expr:\tVAR_ID IS math_expr");
+        { DEBUG("\tbison: is_expr:\tVAR_ID IS math_expr");
           std::string sym($1);
           free($1);
-          std::cerr << "ID: " << sym << std::endl;
+          DEBUG("ID: " << sym);
+          lit_info_t* info = new lit_info_t;
+          lit_id_t id = next_id(std::string("is")); //"is" is the literal
+          var_info_t vars = *$3;
+          vars.first.insert(next_id(sym));
+          info->insert(std::pair<lit_id_t, var_info_t>(id, vars));
+          $$ = info;
         }
         ;
 
@@ -341,25 +370,9 @@ is_expr:
 int main(int, char**) {
 	yyparse();
 
-  DEBUG("");
-  DEBUG("symbol table size: " << symbol_table.size());
-  DEBUG("symbol table:");
   //it was reduced bottom to top
   std::reverse(symbol_table.begin(), symbol_table.end());
-  /*for(auto& elem: symbol_table) {
-    DEBUG("symbol table entry size: " << elem.size());
-    for(auto& entry: elem) {
-      DEBUG("entry key: " << entry.first.repr());
-      DEBUG("entry value var set size: " << entry.second.first.size());
-      for(auto& var_id: entry.second.first) {
-        DEBUG("var_id: " << var_id.repr());
-      }
-      DEBUG("entry value const set size: " << entry.second.second.size());
-      for(auto& const_id: entry.second.second) {
-        DEBUG("const_id: " << const_id.repr());
-      }
-    }
-  }*/
+
   print_symbol_table(symbol_table);
 
 }
