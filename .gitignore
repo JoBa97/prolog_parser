@@ -1,3 +1,4 @@
+
 bin/
 src_generated/
 
@@ -6,3 +7,4 @@ prolog
 *.tab.h
 lex.yy.c
 *.output
+*.out

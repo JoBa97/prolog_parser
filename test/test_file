@@ -6,3 +6,5 @@ test3:-test(a, b), test2(b, c).
 test4(X):- X is 3.
 test5(X, Y):- X is Y.
 test6(X, Y, Z):- Z is X + Y.
+test7(X, Y, Z):- X > Y - Z.
+test8(X, Y):- X is 4, Y is 3.5.

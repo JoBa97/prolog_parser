@@ -62,6 +62,10 @@ symbol_table_t symbol_table;
 %type<var_info> params
 %type<var_info> param
 %type<var_info> math_expr
+%type<var_info> number
+%type<var_info> list
+%type<var_info> lelements
+%type<var_info> lelement
 
 %left EQUAL UNEQUAL SMALLER SMALLER_EQ LARGER LARGER_EQ
 %left ADD SUB
@@ -192,73 +196,126 @@ param:
         }
         | number
         { DEBUG("\tbison: param:\tnumber");
-          $$ = new var_info_t();
+          $$ = $1;
         }
         | SUB number
         { DEBUG("\tbison: param:\tSUB number");
-          $$ = new var_info_t();
+          $$ = $2;
         }
         | list
         { DEBUG("\tbison: param:\tlist");
-          $$ = new var_info_t();
+          $$ = $1;
         }
         ;
 
 number:
           INT
-        {DEBUG("\tbison: number:\tINT");}
+        { DEBUG("\tbison: number:\tINT");
+          //numbers are constants
+          //TODO get value maybe
+          var_info_t* vars = new var_info_t;
+          var_id_t id = next_id("number");
+          vars->second.insert(id);
+          $$ = vars;
+        }
         | FLOAT
-        {DEBUG("\tbison: number:\tFLOAT");}
+        { DEBUG("\tbison: number:\tFLOAT");
+          var_info_t* vars = new var_info_t;
+          var_id_t id = next_id("number");
+          vars->second.insert(id);
+          $$ = vars;
+        }
         ;
 
 list:
           LOPEN lelements LCLOSE
-        {DEBUG("\tbison: list:\tLOPEN lelements LCLOSE");}
+        { DEBUG("\tbison: list:\tLOPEN lelements LCLOSE");
+          $$ = $2;
+        }
   		  |	LOPEN lelements PIPE list LCLOSE
-        {DEBUG("\tbison: list:\tLOPEN lelements PIPE list LCLOSE");}
+        { DEBUG("\tbison: list:\tLOPEN lelements PIPE list LCLOSE");
+          //join list into lelements sets
+          $2->first.insert($4->first.begin(), $4->first.end());
+          $2->second.insert($4->second.begin(), $4->second.end());
+          delete $4;
+          $$ = $2;
+        }
   		  |	LOPEN lelements PIPE VAR_ID LCLOSE
         { DEBUG("\tbison: list:\tLOPEN lelements PIPE VAR_ID LCLOSE");
           std::string sym($4);
           free($4);
           std::cerr << "ID: " << sym << std::endl;
+          //add one var to lelements set
+          //TODO how to handle lists correctly
+          $2->first.insert(next_id(sym));
+          $$ = $2;
         }
         |	LOPEN lelements PIPE ANONYMOUS LCLOSE
-        {DEBUG("\tbison: list:\tLOPEN lelements PIPE ANONYMOUS LCLOSE");}
+        { DEBUG("\tbison: list:\tLOPEN lelements PIPE ANONYMOUS LCLOSE");
+          //TODO handle anon
+          $$ = $2;
+        }
   		  |	LOPEN LCLOSE
-        {DEBUG("\tbison: list:\tLOPEN LCLOSE");}
+        { DEBUG("\tbison: list:\tLOPEN LCLOSE");
+          //empty list: constant
+          var_info_t* info = new var_info_t();
+          info->second.insert(next_id(std::string("EMPTY_LIST")));
+          $$ = info;
+        }
   		  ;
 
 lelements:
           lelement COMMA lelements
-        {DEBUG("\tbison: lelements:\tlelement COMMA lelements");}
+        { DEBUG("\tbison: lelements:\tlelement COMMA lelements");
+          // join sets
+          $1->first.insert($3->first.begin(), $3->first.end());
+          $1->second.insert($3->second.begin(), $3->second.end());
+          delete $3;
+          $$ = $1;
+        }
         | lelement
-        {DEBUG("\tbison: lelements:\tlelement");}
+        { DEBUG("\tbison: lelements:\tlelement");
+          $$ = $1;
+        }
         ;
 
 lelement:
           CONST_ID
-        {DEBUG("\tbison: lelement:\tCONST_ID");
+        { DEBUG("\tbison: lelement:\tCONST_ID");
           std::string sym($1);
           free($1);
-          std::cerr << "ID: " << sym << std::endl;
+          DEBUG("ID: " << sym);
+          var_info_t* info = new var_info_t();
+          info->second.insert(next_id(sym));
+          $$ = info;
         }
         | VAR_ID
-        {DEBUG("\tbison: lelement:\tVAR_ID");
+        { DEBUG("\tbison: lelement:\tVAR_ID");
           std::string sym($1);
           free($1);
-          std::cerr << "ID: " << sym << std::endl;
+          DEBUG("ID: " << sym);
+          var_info_t* info = new var_info_t();
+          info->first.insert(next_id(sym));
+          $$ = info;
         }
         | ANONYMOUS
-        {DEBUG("\tbison: lelement:\tANONYMOUS");}
+        { DEBUG("\tbison: lelement:\tANONYMOUS");
+          //TODO handle anon
+          $$ = new var_info_t();
+        }
 		    | number
-        {DEBUG("\tbison: lelement:\tnumber");}
+        { DEBUG("\tbison: lelement:\tnumber");
+          $$ = $1;
+        }
         | SUB number
-        {DEBUG("\tbison: lelement:\tnumber");}
+        { DEBUG("\tbison: lelement:\tnumber");
+          $$ = $2;
+        }
 		    | list
-        {DEBUG("\tbison: lelement:\tlist");}
+        { DEBUG("\tbison: lelement:\tlist");
+          $$ = $1;
+        }
 		    ;
-
-
 
 expressions:
           expression COMMA expressions
@@ -291,31 +348,37 @@ expression:
 
 comp_operator:
           EQUAL
-        {DEBUG("\tbison: comp_operator:\tEQUAL");}
+        { DEBUG("\tbison: comp_operator:\tEQUAL");}
 	      | UNEQUAL
-        {DEBUG("\tbison: comp_operator:\tUNEQUAL");}
+        { DEBUG("\tbison: comp_operator:\tUNEQUAL");}
 	      | SMALLER_EQ
-        {DEBUG("\tbison: comp_operator:\tSMALLER_EQ");}
+        { DEBUG("\tbison: comp_operator:\tSMALLER_EQ");}
 	      | LARGER_EQ
-        {DEBUG("\tbison: comp_operator:\tLARGER_EQ");}
+        { DEBUG("\tbison: comp_operator:\tLARGER_EQ");}
 	      | SMALLER
-        {DEBUG("\tbison: comp_operator:\tSMALLER");}
+        { DEBUG("\tbison: comp_operator:\tSMALLER");}
 	      | LARGER
-        {DEBUG("\tbison: comp_operator:\tLARGER");}
+        { DEBUG("\tbison: comp_operator:\tLARGER");}
 	      ;
 
 bool_expr:
           math_expr comp_operator math_expr
         { DEBUG("\tbison: bool_expr:\tmath_expr comp_operator math_expr");
-          $$ = new lit_info_t();
+          lit_info_t* info = new lit_info_t;
+          lit_id_t id = next_id(std::string("COMPEARE"));
+          $1->first.insert($3->first.begin(), $3->first.end());
+          $1->second.insert($3->second.begin(), $3->second.end());
+          var_info_t vars = *$1;
+          delete $3;
+          info->insert(std::pair<lit_id_t, var_info_t>(id, vars));
+          $$ = info;
         }
         ;
 
 math_expr:
   			  number
         { DEBUG("\tbison: math_expr:\tnumber");
-          //TODO think about numbers
-          $$ = new var_info_t();
+          $$ = $1;
         }
   			| VAR_ID
         { DEBUG("\tbison: math_expr:\tVAR_ID");
@@ -364,7 +427,7 @@ is_expr:
           free($1);
           DEBUG("ID: " << sym);
           lit_info_t* info = new lit_info_t;
-          lit_id_t id = next_id(std::string("is")); //"is" is the literal
+          lit_id_t id = next_id(std::string("IS")); //"IS" is the literal
           var_info_t vars = *$3;
           vars.first.insert(next_id(sym));
           info->insert(std::pair<lit_id_t, var_info_t>(id, vars));
