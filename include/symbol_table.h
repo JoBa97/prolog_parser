@@ -25,9 +25,14 @@ struct NamedId {
 };
 
 struct NamedIdCompare {
-  bool operator() (const NamedId& lhs, const NamedId& rhs) const
-  {
+  bool operator() (const NamedId& lhs, const NamedId& rhs) const {
     return lhs.id < rhs.id;
+  }
+};
+
+struct VarIdCompare {
+  bool operator() (const NamedId& lhs, const NamedId& rhs) const {
+    return lhs.name < rhs.name;
   }
 };
 
@@ -35,7 +40,7 @@ typedef NamedId lit_id_t, var_id_t, const_id_t;
 
 typedef
 std::pair<
-  std::set<var_id_t, NamedIdCompare>,
+  std::set<var_id_t, VarIdCompare>,
   std::set<const_id_t, NamedIdCompare>
 > var_info_t;
 

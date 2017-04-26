@@ -6,6 +6,7 @@
 
 #include "debug.h"
 #include "symbol_table.h"
+#include "flow_blocks.h"
 
 extern "C" int yylex();
 extern "C" int yyparse();
