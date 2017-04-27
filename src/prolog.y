@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "symbol_table.h"
 #include "flow_blocks.h"
+#include "codegen.h"
 
 extern "C" int yylex();
 extern "C" int yyparse();
@@ -18,9 +19,6 @@ void yyerror(const char *s) {
 }
 
 symbol_table_t symbol_table;
-
-//TODO all variables have different ids
-//TODO equals, need to be unified
 
 %}
 
@@ -445,5 +443,8 @@ int main(int, char**) {
   std::reverse(symbol_table.begin(), symbol_table.end());
 
   print_symbol_table(symbol_table);
+
+  auto flow_code = generate_flow_code(symbol_table);
+  print_flow_code(flow_code);
 
 }
