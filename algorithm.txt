@@ -1,0 +1,89 @@
+Statement statement = getStatementFromTable();
+if(statement.literalCount() > 1) {
+	List<Block> blocks;
+	for(int i = 1; i < statement.literalCount(); i++) {
+		Block block = new Block();//The wrapper
+		if(i > 1) {
+			for(int j = i - 1; j < i; j++) {
+				int dependency = checkDependency(statement, j, i);
+				if(dependency != 4) {
+					Element e = getElement(dependency);
+					e.setInput(blocks.get(j));
+					block.addElement(e);
+				}
+			}
+		}
+		blocks.add(block);
+	}
+}
+else {
+	//It's a fact
+}
+/*
+0 = Dependent
+1 = Ground test
+2 = Ground/Independence test
+3 = Independence test
+4 = Independant
+ */
+int checkDependency(Statement s, int i, int j) {
+	Set<VarID> knownVars = s.get(0).getVars();
+	for(int k = 0; k < i; k++) {
+		knownVars.addAll(s.get(k).getVars());
+	}
+	Set<VarID> block1Vars = s.get(i).getVars();
+	Set<VarID> block2Vars = s.get(j).getVars();
+	boolean uniqueVars1 = false;
+	boolean uniqueVars2 = false;
+	boolean uniqueTemps1 = false;
+	boolean uniqueTemps2 = false;
+	boolean sharedVars = false;
+	boolean sharedTemps = false;
+	
+	for(VarID v : block1Vars) {
+		if(knownVars.contains(v)) {
+			if(sharedVars && uniqueVars1) continue;
+			if(block2Vars.contains(v)) {
+				sharedVars = true;
+			}
+			else {
+				uniqueVars1 = true;
+			}
+		}
+		else {
+			if(sharedTemps && uniqueTemps1) continue;
+			if(block2Vars.contains(v)) {
+				sharedTemps = true;
+			}
+			else {
+				uniqueTemps1 = true;
+			}
+		}
+		if(sharedTemps && sharedVars && uniqueTemps1 && uniqueVars1) break;
+	}
+	for(VarID v : block2Vars) {
+		if(block1Vars.contains(v)) continue;
+		if(knownVars.contains(v)) {
+			uniqueVars2 = true;
+		}
+		else {
+			uniqueTemps2 = true;
+		}
+		if(uniqueVars2 && uniqueTemps2) break; //Early exit
+	}
+	if(sharedTemps) {
+		return 0;
+	}
+	if(sharedVars) {
+		if(uniqueVars1 && uniqueVars2) {
+			return 2;
+		}
+		else {
+			return 1;
+		}
+	}
+	if(uniqueVars1 && uniqueVars2) {
+		return 3;
+	}
+	return 4;
+}

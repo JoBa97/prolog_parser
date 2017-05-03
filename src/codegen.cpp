@@ -14,6 +14,7 @@ std::vector<std::string> generate_flow_code(symbol_table_t& symbol_table) {
   std::unique_ptr<IBaseDependecyElement> wrapped_2(new ADependencyElement());
 
   entry_block->addEOutput(wrapper_1->leftUInput());
+
   entry_block->addCOutput(wrapper_1->entryCUInput());
   entry_block->addCOutput(wrapper_2->entryCUInput());
 
@@ -24,10 +25,6 @@ std::vector<std::string> generate_flow_code(symbol_table_t& symbol_table) {
   wrapper_1->addCOutput(wrapper_2->dependencyElementExternInput(0));
   wrapper_1->addUOutput(wrapper_2->leftUInput());
   wrapper_2->addUOutput(return_block->rInput());
-
-
-
-
 
   blocks.emplace_back(entry_block);
   blocks.emplace_back(wrapper_1);
