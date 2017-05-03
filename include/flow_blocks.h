@@ -98,7 +98,27 @@ class WrapperBlock
       m_a(Node('A', std::string())),
       m_c(Node('C', std::string())),
       m_dep_elements() {
-        //link the nodes
+        m_a.addOutput(m_c.inputPort(1));
+        m_c.addOutput(m_u_from_prev_left_u.inputPort(2));
+      }
+
+      //TODO how to insert dependencies
+
+      InputPortRef entryUInput() {
+        return m_u_from_entry_c.inputPort(1);
+      }
+
+      InputPortRef leftUInput() {
+        return m_u_from_prev_left_u.inputPort(1);
+      }
+
+      void addDependencyElement(std::unique_ptr<IBaseDependecyElement> dep_elem) {
+        m_dep_elements.emplace_back(std::move(dep_elem));
+      }
+
+      void finalizeConnections() {
+        //only call once
+        //TODO wire up the inner dep and other nodes
       }
 
     std::vector<std::string> toInstructions() const;
@@ -243,7 +263,6 @@ class CDependencyElement
     Node m_g, m_i, m_u;
 };
 
-
 class DDependencyElement
 : public IBaseDependecyElement {
   // independence test
@@ -273,7 +292,6 @@ class DDependencyElement
   private:
     Node m_i, m_u;
 };
-
 
 class EDependencyElement
 : public IBaseDependecyElement {
