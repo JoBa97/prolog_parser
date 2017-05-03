@@ -35,6 +35,43 @@ class InputPortRef {
     const node_id_t* node_ref;
 };
 
+class Node {
+public:
+    Node(char type, const std::string& info)
+    : m_id(-1),
+      m_type(type),
+      m_info(info),
+      m_outputs() {}
+
+    void assignId(node_id_t id) {
+      m_id = id;
+    }
+
+    InputPortRef inputPort(int port_no) {
+      return InputPortRef(port_no, &m_id);
+    }
+
+    void addOutput(InputPortRef input_ref) {
+      m_outputs.push_back(input_ref);
+    }
+
+    std::string repr() const {
+      std::ostringstream repr;
+      repr << m_id
+            << " " << m_type;
+      for(auto& out: m_outputs) {
+        repr << " " << out.repr();
+      }
+      return repr.str();
+    }
+
+  private:
+    node_id_t m_id;
+    char m_type;
+    std::string m_info;
+    std::vector<InputPortRef> m_outputs;
+};
+
 class IBaseBlock {
   public:
     virtual std::vector<std::string> toInstructions() const = 0;
@@ -42,321 +79,63 @@ class IBaseBlock {
     virtual node_id_t assignIds(node_id_t start) = 0;
 };
 
-class EntryBlock
-  : public IBaseBlock {
+//TODO this class
+class WrapperBlock
+: public IBaseBlock {
   public:
-    EntryBlock(std::string lit_info)
-    : e_node_out_1(InputPortRef()),
-      c_node_outs(std::vector<InputPortRef>()),
-      e_node_id(-1),
-      c_node_id(-1),
-      e_lit_info(lit_info) {
+    WrapperBlock() {}
+
+    std::vector<std::string> toInstructions() const;
+    node_id_t assignIds(node_id_t start);
+
+  private:
+/*    Node m_u_from_entry_c,
+          m_u_from_prev_left_u,
+          m_a,
+          m_c;*/
+};
+
+class EntryBlock
+:public IBaseBlock {
+  public:
+    EntryBlock(const std::string& lit_info)
+    : m_e(Node('E', lit_info)),
+     m_c(Node('C', std::string())) {
+      m_e.addOutput(m_c.inputPort(1));
     }
 
     std::vector<std::string> toInstructions() const;
+    node_id_t assignIds(node_id_t start);
 
-    node_id_t assignIds(node_id_t start) {
-      e_node_id = start++;
-      c_node_id = start++;
-      return start;
+    void addEOutput(InputPortRef input_ref) {
+      m_e.addOutput(input_ref);
     }
 
-    void setENodeOut1(const InputPortRef& ref) {
-      e_node_out_1 = ref;
-    }
-
-    void addCnodeOut(const InputPortRef& ref) {
-      c_node_outs.push_back(ref);
+    void addCOutput(InputPortRef input_ref) {
+      m_c.addOutput(input_ref);
     }
 
   private:
-
-    InputPortRef e_node_out_1;
-    std::vector<InputPortRef> c_node_outs;
-    node_id_t e_node_id, c_node_id;
-    std::string e_lit_info;
+    Node m_e,
+          m_c;
 };
 
 class ReturnBlock
-  : public IBaseBlock {
+: public IBaseBlock {
   public:
     ReturnBlock()
-    : r_node_id(-1) {}
+    : m_r(Node('R', std::string())) {}
 
     std::vector<std::string> toInstructions() const;
+    node_id_t assignIds(node_id_t start);
 
-    node_id_t assignIds(node_id_t start) {
-      r_node_id = start++;
-      return start;
-    }
-
-    InputPortRef rInput() const {
-      return InputPortRef(1, &r_node_id);
+    InputPortRef rInput() {
+      return m_r.inputPort(1);
     }
 
   private:
-    node_id_t r_node_id;
+    Node m_r;
 };
 
-class ABlock
-  : public IBaseBlock {
-  public:
-    ABlock(std::string lit_info)
-    : u_node_out_1(InputPortRef()),
-      c_node_out_2(InputPortRef()),
-      u_1_node_id(-1),
-      u_2_node_id(-1),
-      u_3_node_id(-1),
-      a_node_id(-1),
-      c_node_id(-1),
-      u_lit_info(lit_info) {}
-
-    std::vector<std::string> toInstructions() const;
-
-    node_id_t assignIds(node_id_t start) {
-      u_1_node_id = start++;
-      u_2_node_id = start++;
-      a_node_id = start++;
-      c_node_id = start++;
-      u_3_node_id = start++;
-      return start;
-    }
-
-    void setUNodeOut1(const InputPortRef& ref) {
-      u_node_out_1 = ref;
-    }
-
-    void setCNodeOut2(const InputPortRef& ref) {
-      c_node_out_2 = ref;
-    }
-
-    InputPortRef u1Input() const {
-      return InputPortRef(1, &u_1_node_id);
-    }
-
-    InputPortRef u2Input() const {
-      return InputPortRef(1, &u_2_node_id);
-    }
-
-    InputPortRef u3Input() const {
-      return InputPortRef(1, &u_3_node_id);
-    }
-
-  private:
-    InputPortRef u_node_out_1, c_node_out_2;
-    node_id_t u_1_node_id, u_2_node_id, u_3_node_id,
-      a_node_id, c_node_id;
-    std::string u_lit_info;
-};
-
-class BBlock
-  : public IBaseBlock {
-  public:
-    BBlock(std::string lit_info, std::string ground_info)
-    : u_node_out_1(InputPortRef()),
-      c_node_out_2(InputPortRef()),
-      u_1_node_id(-1),
-      u_2_node_id(-1),
-      u_3_node_id(-1),
-      g_node_id(-1),
-      a_node_id(-1),
-      c_node_id(-2),
-      u_lit_info(lit_info),
-      g_info(ground_info) {}
-
-    std::vector<std::string> toInstructions() const;
-
-    node_id_t assignIds(node_id_t start) {
-      u_1_node_id = start++;
-      g_node_id   = start++;
-      u_2_node_id = start++;
-      a_node_id   = start++;
-      c_node_id   = start++;
-      u_3_node_id = start++;
-      return start;
-    }
-
-    void setUNodeOut1(const InputPortRef& ref) {
-      u_node_out_1 = ref;
-    }
-
-    void setCNodeOut2(const InputPortRef& ref) {
-      c_node_out_2 = ref;
-    }
-
-    InputPortRef u1Input() const {
-      return InputPortRef(1, &u_1_node_id);
-    }
-
-    InputPortRef u2Input() const {
-      return InputPortRef(1, &u_2_node_id);
-    }
-
-    InputPortRef u3Input() const {
-      return InputPortRef(1, &u_3_node_id);
-    }
-
-  private:
-    InputPortRef u_node_out_1, c_node_out_2;
-    node_id_t u_1_node_id, u_2_node_id, u_3_node_id,
-      g_node_id, a_node_id, c_node_id;
-    std::string u_lit_info, g_info;
-};
-
-class CBlock
-  : public IBaseBlock {
-  public:
-    CBlock(std::string lit_info, std::string ground_info, std::string independence_info)
-    : u_node_out_1(InputPortRef()),
-      c_node_out_2(InputPortRef()),
-      u_1_node_id(-1),
-      u_2_node_id(-1),
-      u_3_node_id(-1),
-      g_node_id(-1),
-      i_node_id(-1),
-      a_node_id(-1),
-      c_node_id(-1),
-      u_lit_info(lit_info),
-      g_info(ground_info),
-      i_info(independence_info) {}
-
-    std::vector<std::string> toInstructions() const;
-
-    node_id_t assignIds(node_id_t start) {
-      u_1_node_id = start++;
-      g_node_id   = start++;
-      i_node_id   = start++;
-      u_2_node_id = start++;
-      a_node_id   = start++;
-      c_node_id   = start++;
-      u_3_node_id = start++;
-      return start;
-    }
-
-    void setUNodeOut1(const InputPortRef& ref) {
-      u_node_out_1 = ref;
-    }
-
-    void setCNodeOut2(const InputPortRef& ref) {
-      c_node_out_2 = ref;
-    }
-
-    InputPortRef u1Input() const {
-      return InputPortRef(1, &u_1_node_id);
-    }
-
-    InputPortRef u2Input() const {
-      return InputPortRef(1, &u_2_node_id);
-    }
-
-    InputPortRef u3Input() const {
-      return InputPortRef(1, &u_3_node_id);
-    }
-
-  private:
-    InputPortRef u_node_out_1, c_node_out_2;
-    node_id_t u_1_node_id, u_2_node_id, u_3_node_id,
-      g_node_id, i_node_id, a_node_id, c_node_id;
-    std::string u_lit_info, g_info, i_info;
-};
-
-class DBlock
-  : public IBaseBlock {
-  public:
-    DBlock(std::string lit_info, std::string independence_info)
-    : u_node_out_1(InputPortRef()),
-      c_node_out_2(InputPortRef()),
-      u_1_node_id(-1),
-      u_2_node_id(-1),
-      u_3_node_id(-1),
-      i_node_id(-1),
-      a_node_id(-1),
-      c_node_id(-1),
-      u_lit_info(lit_info),
-      i_info(independence_info) {}
-
-    std::vector<std::string> toInstructions() const;
-
-    node_id_t assignIds(node_id_t start) {
-      u_1_node_id = start++;
-      i_node_id   = start++;
-      u_2_node_id = start++;
-      a_node_id   = start++;
-      c_node_id   = start++;
-      u_3_node_id = start++;
-      return start;
-    }
-
-    void setUNodeOut1(const InputPortRef& ref) {
-      u_node_out_1 = ref;
-    }
-
-    void setCNodeOut2(const InputPortRef& ref) {
-      c_node_out_2 = ref;
-    }
-
-    InputPortRef u1Input() const {
-      return InputPortRef(1, &u_1_node_id);
-    }
-
-    InputPortRef u2Input() const {
-      return InputPortRef(1, &u_2_node_id);
-    }
-
-    InputPortRef u3Input() const {
-      return InputPortRef(1, &u_3_node_id);
-    }
-
-  private:
-    InputPortRef u_node_out_1, c_node_out_2;
-    node_id_t u_1_node_id, u_2_node_id, u_3_node_id,
-      i_node_id, a_node_id, c_node_id;
-    std::string u_lit_info, i_info;
-};
-
-class EBlock
-  : public IBaseBlock {
-  public:
-    EBlock(std::string lit_info)
-    : u_node_out_1(InputPortRef()),
-      c_node_out_2(InputPortRef()),
-      u_1_node_id(-1),
-      u_2_node_id(-1),
-      a_node_id(-1),
-      c_node_id(-1),
-      u_lit_info(lit_info) {}
-
-    std::vector<std::string> toInstructions() const;
-
-    node_id_t assignIds(node_id_t start) {
-      u_1_node_id = start++;
-      a_node_id   = start++;
-      c_node_id   = start++;
-      u_2_node_id = start++;
-      return start;
-    }
-
-    void setUNodeOut1(const InputPortRef& ref) {
-      u_node_out_1 = ref;
-    }
-
-    void setCNodeOut2(const InputPortRef& ref) {
-      c_node_out_2 = ref;
-    }
-
-    InputPortRef u1Input() const {
-      return InputPortRef(1, &u_1_node_id);
-    }
-
-    InputPortRef u2Input() const {
-      return InputPortRef(1, &u_2_node_id);
-    }
-
-  private:
-    InputPortRef u_node_out_1, c_node_out_2;
-    node_id_t u_1_node_id, u_2_node_id,
-      a_node_id, c_node_id;
-    std::string u_lit_info;
-};
 
 #endif /* FLOW_BLOCKS_H */
