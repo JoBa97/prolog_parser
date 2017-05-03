@@ -36,7 +36,7 @@ class InputPortRef {
 };
 
 class Node {
-public:
+  public:
     Node(char type, const std::string& info)
     : m_id(-1),
       m_type(type),
@@ -137,5 +137,92 @@ class ReturnBlock
     Node m_r;
 };
 
+class IBaseDependecyElement
+: public IBaseBlock {
+  public:
+    virtual InputPortRef internInput() = 0;
+    virtual InputPortRef externInput() = 0;
+    virtual void addInternOutput(InputPortRef input_ref) = 0;
+
+};
+
+class ADependencyElement
+: public IBaseDependecyElement {
+  // unconditioned dependency
+  public:
+    ADependencyElement()
+    : m_u(Node('U', std::string())) {}
+
+    InputPortRef internInput() {
+      return m_u.inputPort(2);
+    }
+
+    InputPortRef externInput() {
+      return m_u.inputPort(1);
+    }
+
+    void addInternOutput(InputPortRef input_ref) {
+      m_u.addOutput(input_ref);
+    }
+
+    std::vector<std::string> toInstructions() const;
+
+    node_id_t assignIds(node_id_t start) {
+      m_u.assignId(start++);
+      return start;
+    }
+
+  private:
+    Node m_u;
+};
+
+//TODO further depenecy types
+
+class BDependencyElement
+: public IBaseDependecyElement {
+  // ground test
+  public:
+    InputPortRef internInput();
+    InputPortRef externInput();
+    void addInternOutput(InputPortRef input_ref);
+    std::vector<std::string> toInstructions() const;
+    node_id_t assignIds(node_id_t start);
+};
+
+
+class CDependencyElement
+: public IBaseDependecyElement {
+  // ground/independence test
+  public:
+    InputPortRef internInput();
+    InputPortRef externInput();
+    void addInternOutput(InputPortRef input_ref);
+    std::vector<std::string> toInstructions() const;
+    node_id_t assignIds(node_id_t start);
+};
+
+
+class DDependencyElement
+: public IBaseDependecyElement {
+  // independence test
+  public:
+    InputPortRef internInput();
+    InputPortRef externInput();
+    void addInternOutput(InputPortRef input_ref);
+    std::vector<std::string> toInstructions() const;
+    node_id_t assignIds(node_id_t start);
+};
+
+
+class EDependencyElement
+: public IBaseDependecyElement {
+  //independant
+  public:
+    InputPortRef internInput();
+    InputPortRef externInput();
+    void addInternOutput(InputPortRef input_ref);
+    std::vector<std::string> toInstructions() const;
+    node_id_t assignIds(node_id_t start);
+};
 
 #endif /* FLOW_BLOCKS_H */

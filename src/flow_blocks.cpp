@@ -40,3 +40,10 @@ ReturnBlock::assignIds(node_id_t start) {
   m_r.assignId(start++);
   return start;
 }
+
+std::vector<std::string>
+ADependencyElement::toInstructions() const {
+  std::vector<std::string> instructions;
+  instructions.push_back(m_u.repr());
+  return instructions;
+}
