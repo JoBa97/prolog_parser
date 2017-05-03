@@ -203,8 +203,6 @@ class BBlock
     std::string u_lit_info, g_info;
 };
 
-//TODO the other classes
-
 class CBlock
   : public IBaseBlock {
   public:
