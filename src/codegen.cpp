@@ -9,10 +9,29 @@ std::vector<std::string> generate_flow_code(symbol_table_t& symbol_table) {
 
   auto entry_block = new EntryBlock(std::string("test"));
   auto return_block = new ReturnBlock();
+  auto wrapper_1 = new WrapperBlock(std::string("test2"));
+  auto wrapper_2 = new WrapperBlock(std::string("test3"));
+  std::unique_ptr<IBaseDependecyElement> wrapped_2(new ADependencyElement());
 
-  entry_block->addEOutput(return_block->rInput());
+  entry_block->addEOutput(wrapper_1->leftUInput());
+  entry_block->addCOutput(wrapper_1->entryCUInput());
+  entry_block->addCOutput(wrapper_2->entryCUInput());
+
+  wrapper_1->finalizeConnections();
+  wrapper_2->addDependencyElement(std::move(wrapped_2));
+  wrapper_2->finalizeConnections();
+
+  wrapper_1->addCOutput(wrapper_2->dependencyElementExternInput(0));
+  wrapper_1->addUOutput(wrapper_2->leftUInput());
+  wrapper_2->addUOutput(return_block->rInput());
+
+
+
+
 
   blocks.emplace_back(entry_block);
+  blocks.emplace_back(wrapper_1);
+  blocks.emplace_back(wrapper_2);
   blocks.emplace_back(return_block);
 
   node_id_t next_id = 0;

@@ -3,13 +3,28 @@
 std::vector<std::string>
 WrapperBlock::toInstructions() const {
   std::vector<std::string> instructions;
-  //TODO
+  instructions.push_back(m_u_from_entry_c.repr());
+  //add all dep elem instr
+  for (auto& dep_elem: m_dep_elements) {
+    for (auto& instr: dep_elem->toInstructions()) {
+      instructions.push_back(instr);
+    }
+  }
+  instructions.push_back(m_a.repr());
+  instructions.push_back(m_c.repr());
+  instructions.push_back(m_u_from_prev_left_u.repr());
   return instructions;
 }
 
 node_id_t
 WrapperBlock::assignIds(node_id_t start) {
-  //TODO
+  m_u_from_entry_c.assignId(start++);
+  for (auto& dep_elem: m_dep_elements) {
+    start = dep_elem->assignIds(start);
+  }
+  m_a.assignId(start++);
+  m_c.assignId(start++);
+  m_u_from_prev_left_u.assignId(start++);
   return start;
 }
 
