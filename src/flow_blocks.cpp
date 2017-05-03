@@ -47,3 +47,56 @@ ADependencyElement::toInstructions() const {
   instructions.push_back(m_u.repr());
   return instructions;
 }
+
+node_id_t
+ADependencyElement::assignIds(node_id_t start) {
+  m_u.assignId(start++);
+  return start;
+}
+
+std::vector<std::string>
+BDependencyElement::toInstructions() const {
+  std::vector<std::string> instructions;
+  instructions.push_back(m_g.repr());
+  instructions.push_back(m_u.repr());
+  return instructions;
+}
+
+node_id_t
+BDependencyElement::assignIds(node_id_t start) {
+  m_g.assignId(start++);
+  m_u.assignId(start++);
+  return start;
+}
+
+std::vector<std::string>
+CDependencyElement::toInstructions() const {
+  std::vector<std::string> instructions;
+  instructions.push_back(m_g.repr());
+  instructions.push_back(m_i.repr());
+  instructions.push_back(m_u.repr());
+  return instructions;
+}
+
+node_id_t
+CDependencyElement::assignIds(node_id_t start) {
+  m_g.assignId(start++);
+  m_i.assignId(start++);
+  m_u.assignId(start++);
+  return start;
+}
+
+std::vector<std::string>
+DDependencyElement::toInstructions() const {
+  std::vector<std::string> instructions;
+  instructions.push_back(m_i.repr());
+  instructions.push_back(m_u.repr());
+  return instructions;
+}
+
+node_id_t
+DDependencyElement::assignIds(node_id_t start) {
+  m_i.assignId(start++);
+  m_u.assignId(start++);
+  return start;
+}
