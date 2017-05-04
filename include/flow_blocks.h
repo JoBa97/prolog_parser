@@ -119,26 +119,9 @@ class WrapperBlock
         return m_dep_elements[n]->externInput();
       }
 
-      void finalizeConnections() {
-        //only call once
-        // wire up the inner dep and other nodes
-        if (m_dep_elements.empty()) {
-          //TODO think about: can EDependencyElement be handled by no dep elem
-          m_u_from_entry_c.addOutput(m_a.inputPort(1));
-        } else {
-          m_u_from_entry_c.addOutput(m_dep_elements[0]->internInput());
-          // wire up
-          for (size_t i = 0; i < m_dep_elements.size(); i++) {
-            if (m_dep_elements.size() - 1 == i) {
-              //last dep elem
-              m_dep_elements[i]->addInternOutput(m_a.inputPort(1));
-            } else {
-              m_dep_elements[i]->addInternOutput(
-                m_dep_elements[i+1]->internInput());
-            }
-          }
-        }
-      }
+      //only call once
+      // wire up the inner dep and other nodes
+      void finalizeConnections(); 
 
       void addUOutput(InputPortRef input_ref) {
         m_u_from_prev_left_u.addOutput(input_ref);
@@ -320,7 +303,7 @@ class DDependencyElement
     Node m_i, m_u;
 };
 
-/* //handeled by empty dependency in wrapper
+ //handeled by empty dependency in wrapper
 class EDependencyElement
 : public IBaseDependecyElement {
   //independant
@@ -353,6 +336,6 @@ class EDependencyElement
   private:
     InputPortRef m_pass_through;
 };
-*/
+
 
 #endif /* FLOW_BLOCKS_H */

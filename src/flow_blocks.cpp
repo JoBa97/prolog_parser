@@ -1,5 +1,27 @@
 #include "flow_blocks.h"
 
+void WrapperBlock::finalizeConnections() {
+  //only call once
+  // wire up the inner dep and other nodes
+  if (m_dep_elements.empty()) {
+    //TODO think about: can EDependencyElement be handled by no dep elem
+    m_u_from_entry_c.addOutput(m_a.inputPort(1));
+  } else {
+    m_u_from_entry_c.addOutput(m_dep_elements[0]->internInput());
+    // wire up
+    for (size_t i = 0; i < m_dep_elements.size(); i++) {
+      if (m_dep_elements.size() - 1 == i) {
+        //last dep elem
+        m_dep_elements[i]->addInternOutput(m_a.inputPort(1));
+      } else {
+        m_dep_elements[i]->addInternOutput(
+          m_dep_elements[i+1]->internInput());
+      }
+    }
+  }
+}
+
+
 std::vector<std::string>
 WrapperBlock::toInstructions() const {
   std::vector<std::string> instructions;

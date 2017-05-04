@@ -1,1 +1,4 @@
-test(A, A, B):-a(A), a(B).
+test(A, A, B).
+test2.
+test3([X]).
+test4(X):-test(X, X, X).
