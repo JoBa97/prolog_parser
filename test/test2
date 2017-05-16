@@ -1,4 +1,1 @@
-test(A, A, B).
-test2.
-test3([X]).
-test4(X):-test(X, X, X).
+testA(X):-testB(X), testC(X).

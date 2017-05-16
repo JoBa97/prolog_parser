@@ -5,9 +5,11 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <iterator>
 
 #include "symbol_table.h"
 #include "flow_blocks.h"
+#include "debug.h"
 
 std::vector<std::string> generate_flow_code(const symbol_table_t& symbol_table);
 

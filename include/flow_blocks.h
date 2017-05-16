@@ -58,11 +58,11 @@ class Node {
     std::string repr() const {
       std::ostringstream repr;
       repr << m_id
-            << " " << m_type;
+            << "\t " << m_type;
       for(auto& out: m_outputs) {
-        repr << " " << out.repr();
+        repr << "\t " << out.repr();
       }
-      repr << " " << m_info;
+      repr << "\t " << m_info;
       return repr.str();
     }
 
@@ -119,9 +119,9 @@ class WrapperBlock
         return m_dep_elements[n]->externInput();
       }
 
-      //only call once
+      // only call once
       // wire up the inner dep and other nodes
-      void finalizeConnections(); 
+      void finalizeConnections();
 
       void addUOutput(InputPortRef input_ref) {
         m_u_from_prev_left_u.addOutput(input_ref);
@@ -303,6 +303,8 @@ class DDependencyElement
     Node m_i, m_u;
 };
 
+//TODO does  this work ?
+//TODO no dont use this, just dont insert any dep
  //handeled by empty dependency in wrapper
 class EDependencyElement
 : public IBaseDependecyElement {
@@ -316,6 +318,7 @@ class EDependencyElement
     }
 
     InputPortRef externInput() {
+      //not used
       return InputPortRef();
     }
 
