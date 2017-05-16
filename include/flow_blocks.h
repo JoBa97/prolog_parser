@@ -58,11 +58,11 @@ class Node {
     std::string repr() const {
       std::ostringstream repr;
       repr << m_id
-            << "\t " << m_type;
+            << "\t" << m_type << "\t";
       for(auto& out: m_outputs) {
-        repr << "\t " << out.repr();
+        repr << " " << out.repr();
       }
-      repr << "\t " << m_info;
+      repr << "\t" << m_info;
       return repr.str();
     }
 
@@ -221,11 +221,11 @@ class BDependencyElement
       }
 
     InputPortRef internInput() {
-        return m_u.inputPort(1);
+      return m_g.inputPort(1);
     }
 
     InputPortRef externInput() {
-        return m_g.inputPort(1);
+      return m_u.inputPort(1);
     }
 
     void addInternOutput(InputPortRef input_ref) {

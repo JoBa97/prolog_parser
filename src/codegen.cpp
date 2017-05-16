@@ -47,7 +47,7 @@ std::vector<std::string> generate_flow_code(const symbol_table_t& symbol_table) 
             if (4 != dependency) {
               auto dependency_element = get_dependency_element(dependency,
                               std::string("TODO get g_info"),
-                              std::string("TODo get i_info"));
+                              std::string("TODO get i_info"));
               last_wrapper->addCOutput(dependency_element->externInput());
               wrapper_block->addDependencyElement(std::move(dependency_element));
             } else {
