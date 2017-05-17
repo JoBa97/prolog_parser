@@ -23,7 +23,13 @@ void print_flow_code(const std::vector<std::string>& instructions);
 4 = Independant
  */
 
-int check_dependency(const lit_info_t& statement_info, int i, int j);
+ struct DependencyCheckResult {
+   int type;
+   std::string i_info;
+   std::string g_info;
+ };
+
+DependencyCheckResult check_dependency(const lit_info_t& statement_info, int i, int j);
 
 std::unique_ptr<IBaseDependecyElement> get_dependency_element(int dep_type, const std::string& g_info, const std::string& i_info);
 

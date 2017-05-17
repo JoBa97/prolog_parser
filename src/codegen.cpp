@@ -5,8 +5,6 @@ std::vector<std::string> generate_flow_code(const symbol_table_t& symbol_table) 
   std::vector<std::string> instructions;
   std::vector<std::shared_ptr<IBaseBlock>> all_blocks;
 
-      //TODO this algorithm: wow
-
   for (auto& statement_info: symbol_table) {
     if (statement_info.size() > 1) {
       DEBUG("its a rule");
@@ -37,17 +35,17 @@ std::vector<std::string> generate_flow_code(const symbol_table_t& symbol_table) 
           last_wrapper = wrapper_block;
         } else if (i > 1) {
           //need to check dependecies
-          //TODO
           entry_block->addCOutput(wrapper_block->entryCUInput());
           last_wrapper->addUOutput(wrapper_block->leftUInput());
-          for(size_t j = i - 1; j >= 1; j--) {
+          //for(size_t j = i - 1; j >= 1; j--) {
+          for(size_t j=1; j<i; j++) {
             DEBUG("dependency for i=" << i << " j=" << j)
-            int dependency = check_dependency(statement_info, j, i);
-            DEBUG("dependency type: " << dependency);
-            if (4 != dependency) {
-              auto dependency_element = get_dependency_element(dependency,
-                              std::string("TODO get g_info"),
-                              std::string("TODO get i_info"));
+            auto dependency = check_dependency(statement_info, j, i);
+            DEBUG("dependency type: " << dependency.type);
+            if (4 != dependency.type) {
+              auto dependency_element = get_dependency_element(dependency.type,
+                              dependency.g_info,
+                              dependency.i_info);
               last_wrapper->addCOutput(dependency_element->externInput());
               wrapper_block->addDependencyElement(std::move(dependency_element));
             } else {
@@ -86,35 +84,6 @@ std::vector<std::string> generate_flow_code(const symbol_table_t& symbol_table) 
   }
 
 
-    /* TEST */
-/*  auto entry_block = new EntryBlock(std::string("test"));
-  auto return_block = new ReturnBlock();
-  auto wrapper_1 = new WrapperBlock(std::string("test2"));
-  auto wrapper_2 = new WrapperBlock(std::string("test3"));
-  std::unique_ptr<IBaseDependecyElement> wrapped_2(new ADependencyElement());
-
-  entry_block->addEOutput(wrapper_1->leftUInput());
-
-  entry_block->addCOutput(wrapper_1->entryCUInput());
-  entry_block->addCOutput(wrapper_2->entryCUInput());
-
-  wrapper_1->finalizeConnections();
-
-  wrapper_2->addDependencyElement(std::move(wrapped_2));
-  wrapper_2->finalizeConnections();
-
-  wrapper_1->addCOutput(wrapper_2->dependencyElementExternInput(0));
-  wrapper_1->addUOutput(wrapper_2->leftUInput());
-  wrapper_2->addUOutput(return_block->rInput());
-
-  all_blocks.emplace_back(entry_block);
-  all_blocks.emplace_back(wrapper_1);
-  all_blocks.emplace_back(wrapper_2);
-  all_blocks.emplace_back(return_block);
-*/
-  /* TEST END */
-
-
   // assign all the ids
   node_id_t next_id = 0;
   for(auto& block: all_blocks) {
@@ -144,7 +113,7 @@ void print_flow_code(const std::vector<std::string>& instructions) {
 4 = Independant
  */
 
-int check_dependency(const lit_info_t& statement_info, int i, int j) {
+DependencyCheckResult check_dependency(const lit_info_t& statement_info, int i, int j) {
   // i < j
   // swap if necessary
   if (i > j) {
@@ -163,11 +132,9 @@ int check_dependency(const lit_info_t& statement_info, int i, int j) {
   std::advance(map_iter, j);
   const auto& block2Vars = map_iter->second.first;
 
-  bool uniqueVars1 = false;
-  bool uniqueVars2 = false;
-  bool uniqueTemps1 = false;
-  bool uniqueTemps2 = false;
-  bool sharedVars = false;
+  std::set<var_id_t, VarIdCompare> uniqueVars1;
+  std::set<var_id_t, VarIdCompare> uniqueVars2;
+  std::set<var_id_t, VarIdCompare> sharedVars;
   bool sharedTemps = false;
 
   // fill known_vars
@@ -179,26 +146,16 @@ int check_dependency(const lit_info_t& statement_info, int i, int j) {
 
   for (auto& v : block1Vars) {
     if (known_vars.find(v) != known_vars.end()) {
-      if (sharedVars && uniqueVars1) {
-        continue;
-      }
       if (block2Vars.find(v) != block2Vars.end()) {
-        sharedVars = true;
+        sharedVars.insert(v);
       } else {
-        uniqueVars1 = true;
+        uniqueVars1.insert(v);
       }
     } else {
-      if (sharedTemps && uniqueTemps1) {
-        continue;
-      }
       if (block2Vars.find(v) != block2Vars.end()) {
         sharedTemps = true;
-      } else {
-        uniqueTemps1 = true;
+        break;
       }
-    }
-    if (sharedTemps && sharedVars && uniqueTemps1 && uniqueVars1) {
-      break;
     }
   }
 
@@ -207,30 +164,64 @@ int check_dependency(const lit_info_t& statement_info, int i, int j) {
         continue;
       }
       if (known_vars.find(v) != known_vars.end()) {
-        uniqueVars2 = true;
-      } else {
-        uniqueTemps2 = true;
-      }
-      if (uniqueVars2 && uniqueTemps2) {
-        break;
+        uniqueVars2.insert(v);
       }
   }
-
+    DependencyCheckResult result;
   // now decide which case has been detected
   if(sharedTemps) {
-    return 0;
+    result.type = 0; /* Dependent */
+    result.i_info = std::string("");
+    result.g_info = std::string("");
+    return result;
   }
-  if (sharedVars) {
-    if (uniqueVars1 && uniqueVars2) {
-      return 2;
+  if (!sharedVars.empty()) {
+    std::string g_info;
+    for (auto& s: sharedVars) {
+      g_info += s.name;
+      g_info += " ";
+    }
+    result.g_info = g_info;
+    if (!uniqueVars1.empty() && !uniqueVars2.empty()) {
+      result.type = 2; /* ground + independence test */
+      std::string i_info;
+      for (auto& u: uniqueVars1) {
+        i_info += u.name;
+        i_info += " ";
+      }
+      i_info += "| ";
+      for (auto& u: uniqueVars2) {
+        i_info += u.name;
+        i_info += " ";
+      }
+      result.i_info = i_info;
+      return result;
     } else {
-      return 1;
+      result.type = 1; /* ground test */
+      result.i_info = std::string("");
+      return result;
     }
   }
-  if (uniqueVars1 && uniqueVars2) {
-    return 3;
+  if (!uniqueVars1.empty() && !uniqueVars2.empty()) {
+    result.type = 3; /* independence test */
+    result.g_info = std::string("");
+    std::string i_info;
+    for (auto& u: uniqueVars1) {
+      i_info += u.name;
+      i_info += " ";
+    }
+    i_info += "| ";
+    for (auto& u: uniqueVars2) {
+      i_info += u.name;
+      i_info += " ";
+    }
+    result.i_info = i_info;
+    return result;
   }
-  return 4;
+  result.type = 4; /* independent */
+  result.g_info = std::string("");
+  result.i_info = std::string("");
+  return result;
 }
 
 
